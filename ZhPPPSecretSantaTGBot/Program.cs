@@ -11,9 +11,18 @@ namespace ZhPPPSecretSantaTGBot
 
         static void Main()
         {
-            StreamReader sr = new StreamReader("config\\access token.txt");
-            string accessToken = sr.ReadLine();
-            botClient = new TelegramBotClient(accessToken);
+            if (File.Exists("config\\access token.txt"))
+            {
+                StreamReader sr = new StreamReader("config\\access token.txt");
+                string accessToken = sr.ReadLine();
+                botClient = new TelegramBotClient(accessToken);
+            }
+            else
+            {
+                Console.WriteLine(
+                    "Please create directory \"config\" and put there a file \"access token.txt\" with your bot access token");
+                return;
+            }
 
             var me = botClient.GetMeAsync().Result;
             Console.WriteLine(
