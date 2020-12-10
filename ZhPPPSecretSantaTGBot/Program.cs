@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 
@@ -10,7 +11,9 @@ namespace ZhPPPSecretSantaTGBot
 
         static void Main()
         {
-            botClient = new TelegramBotClient("YOUR_ACCESS_TOKEN_HERE");
+            StreamReader sr = new StreamReader("config\\access token.txt");
+            string accessToken = sr.ReadLine();
+            botClient = new TelegramBotClient(accessToken);
 
             var me = botClient.GetMeAsync().Result;
             Console.WriteLine(
