@@ -21,6 +21,7 @@ namespace ZhPPPSecretSantaTGBot
             {
                 Console.WriteLine(
                     "Please create directory \"config\" and put there a file \"access token.txt\" with your bot access token");
+                Console.ReadKey();
                 return;
             }
 
