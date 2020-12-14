@@ -7,6 +7,7 @@
       <e p="packages" t="ExcludeRecursive" />
       <e p="ZhPPPSecretSantaTGBot" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
+        <e p="DBHandler.cs" t="Include" />
         <e p="Logger.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
@@ -16,6 +17,7 @@
           </e>
         </e>
         <e p="Program.cs" t="Include" />
+        <e p="User.cs" t="Include" />
         <e p="ZhPPPSecretSantaTGBot.csproj" t="IncludeRecursive" />
       </e>
       <e p="ZhPPPSecretSantaTGBot.sln" t="IncludeFlat" />
