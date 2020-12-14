@@ -16,6 +16,7 @@
           </e>
         </e>
         <e p="Program.cs" t="Include" />
+        <e p="User.cs" t="Include" />
         <e p="ZhPPPSecretSantaTGBot.csproj" t="IncludeRecursive" />
       </e>
       <e p="ZhPPPSecretSantaTGBot.sln" t="IncludeFlat" />
