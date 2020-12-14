@@ -12,7 +12,7 @@ namespace ZhPPPSecretSantaTGBot
         private FileStream fs;
         private int CurrentFileVersion;
 
-        private User[] Users;
+        public User[] Users;
 
         public DBHandler(Logger logger)
         {
