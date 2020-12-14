@@ -23,7 +23,7 @@ namespace ZhPPPSecretSantaTGBot
 
         public void Log(string message)
         {
-            string toWrite = $"{DateAndTime.Now.ToString()}|{message}";
+            string toWrite = $"{DateAndTime.Now.ToString()}| {message}";
             sr.WriteLine(toWrite);
             Console.WriteLine(toWrite);
         }
