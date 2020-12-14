@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using Microsoft.VisualBasic;
 
 namespace ZhPPPSecretSantaTGBot
 {
@@ -14,7 +12,7 @@ namespace ZhPPPSecretSantaTGBot
         private FileStream fs;
         private int CurrentFileVersion;
 
-        private User[] Users;
+        public User[] Users;
 
         public DBHandler(Logger logger)
         {
