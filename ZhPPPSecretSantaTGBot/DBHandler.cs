@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace ZhPPPSecretSantaTGBot
@@ -11,13 +12,21 @@ namespace ZhPPPSecretSantaTGBot
         private Logger Logger;
         private XmlSerializer Serializer = new XmlSerializer(typeof(User[]));
         private FileStream fs;
+
         private int CurrentFileVersion;
+        private int WriteCounter;
+        private int WriteThreshold = 5;
+        private int WriteCountDeltaSec = 12;
+        private bool HasChanges;
+
+        private bool AppClosing;
 
         public User[] Users;
 
         public DBHandler(Logger logger)
         {
             Logger = logger;
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
             if (!Directory.Exists("data"))
             {
@@ -39,7 +48,7 @@ namespace ZhPPPSecretSantaTGBot
                 Logger.Log($"Creating new data file data\\{CurrentFileVersion}.txt");
                 fs = new FileStream($"data\\{CurrentFileVersion}.txt", FileMode.Create);
                 fs.Close();
-                Write();
+                WriteCount();
             }
             else
             {
@@ -60,6 +69,7 @@ namespace ZhPPPSecretSantaTGBot
                 Logger.Log($"Opening data file {CurrentFileVersion}.txt");
                 fs = new FileStream(filesList.Last(), FileMode.Open);
                 Users = (User[]) Serializer.Deserialize(fs);
+                fs.Close();
                 if (Users == null)
                 {
                     Logger.Log($"Loaded 0 user profiles");
@@ -75,31 +85,61 @@ namespace ZhPPPSecretSantaTGBot
                 } while (filesList.Contains($"data\\{CurrentFileVersion}.txt"));
 
                 Logger.Log($"Creating new data file {CurrentFileVersion}.txt");
-                fs.Close();
                 fs = new FileStream($"data\\{CurrentFileVersion}.txt", FileMode.OpenOrCreate);
                 fs.Close();
                 Write();
             }
+
+            Task.Run(async () =>
+            {
+                do
+                {
+                    WriteCount(false);
+                    await Task.Delay(TimeSpan.FromSeconds(WriteCountDeltaSec));
+                } while (!AppClosing);
+            });
         }
 
-        public void Write()
+        public void WriteCount(bool hasChanges = true)
+        {
+            if (hasChanges)
+            {
+                HasChanges = true;
+            }
+            WriteCounter++;
+            if (WriteCounter >= WriteThreshold)
+            {
+                Logger.Log(
+                    $"Current WriteCounter {WriteCounter} is over threshold {WriteThreshold}");
+                if (HasChanges)
+                {
+                    CurrentFileVersion++;
+                    Write();
+                    WriteCounter = 0;
+                }
+                else
+                {
+                    Logger.Log("But no changes - skip");
+                    WriteCounter = 0;
+                }
+                
+            }
+        }
+
+        private void Write()
         {
             try
             {
-                Logger.Log("--- Deleting data file...");
-                File.Delete($"data\\{CurrentFileVersion}.txt");
-                Logger.Log("--- Deleted.");
                 Logger.Log($"--- Writing to new file data\\{CurrentFileVersion}.txt");
                 fs = new FileStream($"data\\{CurrentFileVersion}.txt", FileMode.Create);
             }
             catch (System.IO.IOException ioException)
             {
                 Logger.Log($"Error: {ioException.Message} at {ioException.StackTrace}");
-                Write();
-                return;
             }
 
             Serializer.Serialize(fs, Users);
+            HasChanges = false;
             Logger.Log("--- Done.");
             fs.Close();
         }
@@ -158,6 +198,12 @@ namespace ZhPPPSecretSantaTGBot
 
                 return ref Users[oldSize];
             }
+        }
+
+        private void OnProcessExit(object? sender, EventArgs e)
+        {
+            AppClosing = true;
+            Write();
         }
     }
 }

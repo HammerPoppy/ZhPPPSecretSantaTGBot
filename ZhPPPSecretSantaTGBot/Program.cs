@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -75,6 +75,7 @@ namespace ZhPPPSecretSantaTGBot
 
                     user.FanOf = e.Message.Text;
                     DBHandler.Write();
+                    DBHandler.WriteCount();
                 }
                 else
                 {
@@ -82,6 +83,7 @@ namespace ZhPPPSecretSantaTGBot
                     user = DBHandler.AddNewUser(user);
                     user.FanOf = e.Message.Text;
                     DBHandler.Write();
+                    DBHandler.WriteCount();
                     try
                     {
                         await BotClient.SendTextMessageAsync(
