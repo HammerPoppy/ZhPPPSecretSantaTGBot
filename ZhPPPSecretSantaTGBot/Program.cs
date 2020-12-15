@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Serialization;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 
@@ -8,7 +10,7 @@ namespace ZhPPPSecretSantaTGBot
     class Program
     {
         static ITelegramBotClient BotClient;
-        static Logger Logger;
+        private static Logger Logger;
         private static DBHandler DBHandler;
 
         static void Main()
@@ -49,13 +51,49 @@ namespace ZhPPPSecretSantaTGBot
         {
             if (e.Message.Text != null)
             {
-                Logger.Log($"Received a text message in chat {e.Message.Chat.Id}|@{e.Message.From.Username}|{e.Message.From.FirstName} {e.Message.From.LastName}");
+                var from = e.Message.From;
+                Logger.Log(
+                    $"Received a text message in chat {e.Message.Chat.Id}|@{from.Username}|{from.FirstName} {from.LastName}");
                 Logger.Log(e.Message.Text);
 
-                await BotClient.SendTextMessageAsync(
-                    chatId: e.Message.Chat,
-                    text: "You said:\n" + e.Message.Text
-                );
+                if (DBHandler.ContainsUser(from.Id))
+                {
+                    var user = DBHandler.GetUserById(from.Id);
+
+                    try
+                    {
+                        await BotClient.SendTextMessageAsync(
+                            chatId: e.Message.Chat,
+                            text: "Hi! I remembered you, last time you said:\n" +
+                                  user.FanOf
+                        );
+                    }
+                    catch (System.Net.Http.HttpRequestException httpRequestException)
+                    {
+                        Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
+                    }
+
+                    user.FanOf = e.Message.Text;
+                    DBHandler.Write();
+                }
+                else
+                {
+                    var user = new User(from.Id, from.Username, from.FirstName, from.LastName);
+                    user = DBHandler.AddNewUser(user);
+                    user.FanOf = e.Message.Text;
+                    DBHandler.Write();
+                    try
+                    {
+                        await BotClient.SendTextMessageAsync(
+                            chatId: e.Message.Chat,
+                            text: "Oh hello there! You are new here I see... I'll remember you 🙂"
+                        );
+                    }
+                    catch (System.Net.Http.HttpRequestException httpRequestException)
+                    {
+                        Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
+                    }
+                }
             }
         }
     }
