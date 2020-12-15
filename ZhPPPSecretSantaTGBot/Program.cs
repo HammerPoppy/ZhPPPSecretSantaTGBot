@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -9,7 +9,7 @@ namespace ZhPPPSecretSantaTGBot
 {
     class Program
     {
-        static ITelegramBotClient BotClient;
+        private static ITelegramBotClient BotClient;
         private static Logger Logger;
         private static DBHandler DBHandler;
 
@@ -42,7 +42,7 @@ namespace ZhPPPSecretSantaTGBot
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
 
-            Logger.Log("Ended execution by user command");
+            Logger.Log("Ending execution by user command");
 
             BotClient.StopReceiving();
         }
@@ -64,8 +64,8 @@ namespace ZhPPPSecretSantaTGBot
                     {
                         await BotClient.SendTextMessageAsync(
                             chatId: e.Message.Chat,
-                            text: "Hi! I remembered you, last time you said:\n" +
-                                  user.FanOf
+                            text: $"Hi! I remembered you, last time you said: {user.FanOf}, you sent me {user.TargetId} messages"
+                                  
                         );
                     }
                     catch (System.Net.Http.HttpRequestException httpRequestException)
@@ -74,7 +74,7 @@ namespace ZhPPPSecretSantaTGBot
                     }
 
                     user.FanOf = e.Message.Text;
-                    DBHandler.Write();
+                    user.TargetId++;
                     DBHandler.WriteCount();
                 }
                 else
@@ -82,7 +82,7 @@ namespace ZhPPPSecretSantaTGBot
                     var user = new User(from.Id, from.Username, from.FirstName, from.LastName);
                     user = DBHandler.AddNewUser(user);
                     user.FanOf = e.Message.Text;
-                    DBHandler.Write();
+                    user.TargetId = 1;
                     DBHandler.WriteCount();
                     try
                     {
