@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -71,6 +71,7 @@ namespace ZhPPPSecretSantaTGBot
                             $"Hi! I remembered you, last time you said: {user.FanOf}, you sent me {user.TargetId} messages"
                         );
                         SendMemo(e.Message.Chat);
+                        SendUserProfile(e.Message.Chat, user);
                     }
                     catch (System.Net.Http.HttpRequestException httpRequestException)
                     {
@@ -125,5 +126,33 @@ namespace ZhPPPSecretSantaTGBot
             }
         }
 
+        static async void SendUserProfile(ChatId to, User user)
+        {
+            string textToSend = "";
+            textToSend += "ФИО: ";
+            textToSend += user.OfficialName + "\n";
+            textToSend += "Номер телефона: ";
+            textToSend += user.Phone + "\n";
+            textToSend += "Город и номер отделения НП: ";
+            textToSend += user.Post + "\n";
+            textToSend += "Я фанат: ";
+            textToSend += user.FanOf + "\n";
+            textToSend += "Мне не стоит дарить: ";
+            textToSend += user.Ban + "\n";
+
+            Logger.Log($"Sending profile to {to}");
+            Logger.Log(textToSend);
+            try
+            {
+                await BotClient.SendTextMessageAsync(
+                    chatId: to,
+                    text: textToSend
+                );
+            }
+            catch (System.Net.Http.HttpRequestException httpRequestException)
+            {
+                Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
+            }
+        }
     }
 }
