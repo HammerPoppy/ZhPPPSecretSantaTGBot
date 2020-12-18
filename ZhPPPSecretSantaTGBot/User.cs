@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace ZhPPPSecretSantaTGBot
@@ -14,7 +14,7 @@ namespace ZhPPPSecretSantaTGBot
 
         public string OfficialName;
         public string Phone;
-        public string PostNumber;
+        public string Post;
         public string FanOf;
         public string Ban;
 
