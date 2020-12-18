@@ -6,6 +6,7 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using File = System.IO.File;
+
 // ReSharper disable StringLiteralTypo
 // ReSharper disable InconsistentNaming
 
@@ -74,6 +75,7 @@ namespace ZhPPPSecretSantaTGBot
                     Logger.Log($"Created new user {from.Username}");
                 }
 
+                string textToSend;
                 switch (e.Message.Text)
                 {
                     case "/start":
@@ -83,7 +85,7 @@ namespace ZhPPPSecretSantaTGBot
 
                         SendMemo(to);
 
-                        var textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
+                        textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
                         Logger.Log($"Sending to {to.Id}");
                         Logger.Log(textToSend);
                         SendMessage(to, textToSend);
@@ -93,6 +95,83 @@ namespace ZhPPPSecretSantaTGBot
                         break;
                     case "/send_my_profile":
                         SendUserProfile(to, user);
+                        break;
+                    case "/abort_registration":
+                        Logger.Log($"User {from} asked for aborting registration");
+                        if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
+                            user.State == States.TargetSent)
+                        {
+                            Logger.Log("But he completed his registration so profile cant be deleted");
+                            textToSend = "Вы уже завершили регистрацию и не можете удалить свою анкету. " +
+                                         "Если Вы все же хотите ее удалить, обращайтесь в наш аккаунт поддержки @bIudger";
+                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log(textToSend);
+                            SendMessage(to, textToSend);
+                        }
+                        else if (user.State == States.NewUser)
+                        {
+                            Logger.Log("But he didnt start registration");
+                            textToSend = "Вы еще не начинали регистрацию";
+                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log(textToSend);
+                            SendMessage(to, textToSend);
+                        }
+                        else
+                        {
+                            textToSend =
+                                "Вы хотите отменить регистрацию. Это очистит все поля в вашей анкете, вы уверены?\n" +
+                                "Для подтверждения отправьте команду /confirm_abort_registration";
+                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log(textToSend);
+                            SendMessage(to, textToSend);
+                        }
+
+                        break;
+                    case "/confirm_abort_registration":
+                        Logger.Log($"User {from} tried to confirm aborting registration");
+
+                        if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
+                            user.State == States.TargetSent)
+                        {
+                            Logger.Log("But he completed his registration so profile cant be deleted");
+                            textToSend = "Вы уже завершили регистрацию и не можете удалить свою анкету. " +
+                                         "Если Вы все же хотите ее удалить, обращайтесь в наш аккаунт поддержки @bIudger";
+                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log(textToSend);
+                            SendMessage(to, textToSend);
+                        }
+                        else if (user.State == States.NewUser)
+                        {
+                            Logger.Log("But he didnt start registration");
+                            textToSend = "Вы еще не начинали регистрацию";
+                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log(textToSend);
+                            SendMessage(to, textToSend);
+                        }
+                        else
+                        {
+                            Logger.Log("Wiping user answers...");
+                            user.OfficialName = null;
+                            Logger.Log("--OfficialName");
+                            user.Phone = null;
+                            Logger.Log("--Phone");
+                            user.Post = null;
+                            Logger.Log("--Post");
+                            user.FanOf = null;
+                            Logger.Log("--FanOf");
+                            user.Ban = null;
+                            Logger.Log("--Ban");
+                            Logger.Log("Done");
+
+                            user.State = States.NewUser;
+
+                            textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
+                                         "Чтобы начать регистрацию отправьте команду /start_registration";
+                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log(textToSend);
+                            SendMessage(to, textToSend);
+                        }
+
                         break;
                 }
             }
