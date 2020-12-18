@@ -56,53 +56,46 @@ namespace ZhPPPSecretSantaTGBot
             if (e.Message.Text != null)
             {
                 var from = e.Message.From;
+                var to = e.Message.Chat;
+                User user;
                 Logger.Log(
                     $"Received a text message in chat {e.Message.Chat.Id}|@{from.Username}|{from.FirstName} {from.LastName}");
                 Logger.Log(e.Message.Text);
-
+                
                 // TODO detect non text
                 if (DBHandler.ContainsUser(from.Id))
                 {
-                    var user = DBHandler.GetUserById(from.Id);
-
-                    try
-                    {
-                        await BotClient.SendTextMessageAsync(
-                            chatId: e.Message.Chat,
-                            text:
-                            $"Hi! I remembered you, last time you said: {user.FanOf}, you sent me {user.TargetId} messages"
-                        );
-                        SendMemo(e.Message.Chat);
-                        SendUserProfile(e.Message.Chat, user);
-                        SendIntroMessages(e.Message.Chat);
-                    }
-                    catch (System.Net.Http.HttpRequestException httpRequestException)
-                    {
-                        Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
-                    }
-
-                    user.FanOf = e.Message.Text;
-                    user.TargetId++;
-                    DBHandler.WriteCount();
+                    user = DBHandler.GetUserById(from.Id);
                 }
                 else
                 {
-                    var user = new User(from.Id, from.Username, from.FirstName, from.LastName);
+                    user = new User(from.Id, from.Username, from.FirstName, from.LastName);
                     user = DBHandler.AddNewUser(user);
-                    user.FanOf = e.Message.Text;
-                    user.TargetId = 1;
-                    DBHandler.WriteCount();
-                    try
-                    {
-                        await BotClient.SendTextMessageAsync(
-                            chatId: e.Message.Chat,
-                            text: "Oh hello there! You are new here I see... I'll remember you 🙂"
-                        );
-                    }
-                    catch (System.Net.Http.HttpRequestException httpRequestException)
-                    {
-                        Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
-                    }
+                    Logger.Log($"Created new user {from.Username}");
+                }
+
+                switch (e.Message.Text)
+                {
+                    case "/start":
+                        SendIntroMessages(to);
+
+                        await Task.Delay(TimeSpan.FromSeconds(4));
+
+                        SendMemo(to);
+
+                        var textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
+                        Logger.Log($"Sending to {to.Id}");
+                        Logger.Log(textToSend);
+                        SendMessage(to, textToSend);
+                        break;
+                    case "/send_memo":
+                        SendMemo(to);
+                        break;
+                    case "/send_my_profile":
+                        SendUserProfile(to, user);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -122,6 +115,26 @@ namespace ZhPPPSecretSantaTGBot
         static async void SendUserProfile(ChatId to, User user)
         {
             string textToSend = "";
+            textToSend += "Статус анкеты: ";
+            switch (user.State)
+            {
+                case States.Registered:
+                    textToSend += "Регистрация завершена\n";
+                    break;
+                case States.NewUser:
+                    textToSend += "Регистрация не начата\n";
+                    break;
+                case States.TargetChosen:
+                    textToSend += "Регистрация завершена\n";
+                    break;
+                case States.TargetSended:
+                    textToSend += "Регистрация завершена, цель получена\n";
+                    break;
+                default:
+                    textToSend += "Регистрация в процессе\n";
+                    break;
+            }
+
             textToSend += "ФИО: ";
             textToSend += user.OfficialName + "\n";
             textToSend += "Номер телефона: ";
@@ -178,7 +191,7 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(textToSend);
             SendMessage(to, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
-            
+
             textToSend = "Ладно, давайте перейдем к делу. Для начала Вам нужно будет заполнить небольшую анкету," +
                          " в которой указать такую информацию:\n" +
                          "ФИО\n" +
@@ -189,7 +202,7 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(textToSend);
             SendMessage(to, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
-            
+
             textToSend = "Форма для регистрации будет открыта до 21.12 12:21 (поторопитесь, попингуйте-потэгайте" +
                          " всех ППшничков которые должны в этом участвовать чтобы никто не пропустил), и 22-о" +
                          " днем Вам придет анкета того кому Вы будете дарить подарок. Далее Вы готовите подарок " +
@@ -197,7 +210,7 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(textToSend);
             SendMessage(to, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
-            
+
             textToSend = "Ориентировочно 27-о числа вечером Вам приходит посылочка и Вы идете ее забираете. " +
                          "Радостные открываете свои носки с оленями и такие же радостные делаете фоточки-видосики и " +
                          "кидаете их сюда в бот, в чатик Прикладного питания или делитесь ими со всеми каким либо " +
@@ -206,7 +219,7 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(textToSend);
             SendMessage(to, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
-            
+
             textToSend = "Касательно подарка - это может быть что угодно, главное чтоб было весело и " +
                          "приятно <i>и <b>от души</b></i>. Наши рекомендации (чтобы никому не было обидно) по " +
                          "поводу стоимости подарка это 100-200грн, а также не забывайте что около 50грн пойдет на " +
@@ -215,7 +228,7 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(textToSend);
             SendMessage(to, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
-            
+
             textToSend = "И на этом наконец все! Совсем скоро Вы уже начнете заполнять анкету, но перед этим " +
                          "хотелось бы сказать про еще один очень важный момент. Этот бот написан каким-то криворуким " +
                          "ППшником на коленке и будет очень неудивительно если бот ляжет или не сможет исполнять " +
@@ -225,7 +238,7 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(textToSend);
             SendMessage(to, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
-            
+
             textToSend = "С любовью, редакция @ppidory <i>(ахвахвхахв у нас внатуре тэг канала - ПИПИДОРЫ)</i>";
             Logger.Log(textToSend);
             SendMessage(to, textToSend);
