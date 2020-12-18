@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using Telegram.Bot;
 using Telegram.Bot.Args;
+using Telegram.Bot.Types;
+using File = System.IO.File;
 
 namespace ZhPPPSecretSantaTGBot
 {
@@ -65,9 +67,10 @@ namespace ZhPPPSecretSantaTGBot
                     {
                         await BotClient.SendTextMessageAsync(
                             chatId: e.Message.Chat,
-                            text: $"Hi! I remembered you, last time you said: {user.FanOf}, you sent me {user.TargetId} messages"
-                                  
+                            text:
+                            $"Hi! I remembered you, last time you said: {user.FanOf}, you sent me {user.TargetId} messages"
                         );
+                        SendMemo(e.Message.Chat);
                     }
                     catch (System.Net.Http.HttpRequestException httpRequestException)
                     {
@@ -99,5 +102,28 @@ namespace ZhPPPSecretSantaTGBot
                 }
             }
         }
+
+        static async void SendMemo(ChatId to)
+        {
+            string textToSend = "21.12 12:21 - закрытие регистрации\n" +
+                                "22-е - получение анкет\n" +
+                                "26-о вечером - отправка подарков\n" +
+                                "27-о вечером (ориентировочно) - получение подарков";
+
+            Logger.Log($"Sending memo to {to}");
+            Logger.Log(textToSend);
+            try
+            {
+                await BotClient.SendTextMessageAsync(
+                    chatId: to,
+                    text: textToSend
+                );
+            }
+            catch (System.Net.Http.HttpRequestException httpRequestException)
+            {
+                Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
+            }
+        }
+
     }
 }
