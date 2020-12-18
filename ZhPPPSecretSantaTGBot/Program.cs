@@ -144,9 +144,9 @@ namespace ZhPPPSecretSantaTGBot
                     text: message
                 );
             }
-            catch (System.Net.Http.HttpRequestException httpRequestException)
+            catch (Exception exception)
             {
-                Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
+                Logger.Log($"Error: {exception}");
             }
         }
     }
