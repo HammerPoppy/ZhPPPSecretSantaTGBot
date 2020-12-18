@@ -11,6 +11,7 @@ namespace ZhPPPSecretSantaTGBot
         public string FirstName;
         public string LastName;
         public States State;
+        public Stages Stage;
 
         public string OfficialName;
         public string Phone;
@@ -37,13 +38,19 @@ namespace ZhPPPSecretSantaTGBot
     public enum States
     {
         NewUser,
+        RegistrationStarted,
+        RegistrationCompleted,
+        TargetChosen,
+        TargetSent
+    }
+    
+    public enum Stages
+    {
+        None,
         StageOffName,
         StagePhone,
         StagePost,
         StageFan,
-        StageBan,
-        Registered,
-        TargetChosen,
-        TargetSended
+        StageBan
     }
 }

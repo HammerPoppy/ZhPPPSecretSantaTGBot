@@ -61,7 +61,7 @@ namespace ZhPPPSecretSantaTGBot
                 Logger.Log(
                     $"Received a text message in chat {e.Message.Chat.Id}|@{from.Username}|{from.FirstName} {from.LastName}");
                 Logger.Log(e.Message.Text);
-                
+
                 // TODO detect non text
                 if (DBHandler.ContainsUser(from.Id))
                 {
@@ -118,7 +118,7 @@ namespace ZhPPPSecretSantaTGBot
             textToSend += "Статус анкеты: ";
             switch (user.State)
             {
-                case States.Registered:
+                case States.RegistrationCompleted:
                     textToSend += "Регистрация завершена\n";
                     break;
                 case States.NewUser:
@@ -127,10 +127,10 @@ namespace ZhPPPSecretSantaTGBot
                 case States.TargetChosen:
                     textToSend += "Регистрация завершена\n";
                     break;
-                case States.TargetSended:
+                case States.TargetSent:
                     textToSend += "Регистрация завершена, цель получена\n";
                     break;
-                default:
+                case States.RegistrationStarted:
                     textToSend += "Регистрация в процессе\n";
                     break;
             }
