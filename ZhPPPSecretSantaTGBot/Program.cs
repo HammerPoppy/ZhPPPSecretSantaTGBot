@@ -86,7 +86,7 @@ namespace ZhPPPSecretSantaTGBot
                         SendMemo(to);
 
                         textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
-                        Logger.Log($"Sending to {to.Id}");
+                        Logger.Log($"Sending to {to}");
                         Logger.Log(textToSend);
                         SendMessage(to, textToSend);
                         break;
@@ -105,7 +105,7 @@ namespace ZhPPPSecretSantaTGBot
                             Logger.Log("But he completed his registration so profile cant be deleted");
                             textToSend = "Вы уже завершили регистрацию и не можете удалить свою анкету. " +
                                          "Если Вы все же хотите ее удалить, обращайтесь в наш аккаунт поддержки @bIudger";
-                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log($"Sending to {to}");
                             Logger.Log(textToSend);
                             SendMessage(to, textToSend);
                         }
@@ -113,7 +113,7 @@ namespace ZhPPPSecretSantaTGBot
                         {
                             Logger.Log("But he didnt start registration");
                             textToSend = "Вы еще не начинали регистрацию";
-                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log($"Sending to {to}");
                             Logger.Log(textToSend);
                             SendMessage(to, textToSend);
                         }
@@ -122,7 +122,7 @@ namespace ZhPPPSecretSantaTGBot
                             textToSend =
                                 "Вы хотите отменить регистрацию. Это очистит все поля в вашей анкете, вы уверены?\n" +
                                 "Для подтверждения отправьте команду /confirm_abort_registration";
-                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log($"Sending to {to}");
                             Logger.Log(textToSend);
                             SendMessage(to, textToSend);
                         }
@@ -137,7 +137,7 @@ namespace ZhPPPSecretSantaTGBot
                             Logger.Log("But he completed his registration so profile cant be deleted");
                             textToSend = "Вы уже завершили регистрацию и не можете удалить свою анкету. " +
                                          "Если Вы все же хотите ее удалить, обращайтесь в наш аккаунт поддержки @bIudger";
-                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log($"Sending to {to}");
                             Logger.Log(textToSend);
                             SendMessage(to, textToSend);
                         }
@@ -145,7 +145,7 @@ namespace ZhPPPSecretSantaTGBot
                         {
                             Logger.Log("But he didnt start registration");
                             textToSend = "Вы еще не начинали регистрацию";
-                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log($"Sending to {to}");
                             Logger.Log(textToSend);
                             SendMessage(to, textToSend);
                         }
@@ -168,12 +168,12 @@ namespace ZhPPPSecretSantaTGBot
 
                             textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
                                          "Чтобы начать регистрацию отправьте команду /start_registration";
-                            Logger.Log($"Sending to {to.Id}");
+                            Logger.Log($"Sending to {to}");
                             Logger.Log(textToSend);
                             SendMessage(to, textToSend);
                             
                             await Task.Delay(TimeSpan.FromSeconds(0.2));
-                            SendMemo(to);
+                            SendUserProfile(to, user);
                         }
 
                         break;
