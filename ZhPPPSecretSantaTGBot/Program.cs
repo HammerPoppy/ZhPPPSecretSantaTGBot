@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -113,17 +113,7 @@ namespace ZhPPPSecretSantaTGBot
 
             Logger.Log($"Sending memo to {to}");
             Logger.Log(textToSend);
-            try
-            {
-                await BotClient.SendTextMessageAsync(
-                    chatId: to,
-                    text: textToSend
-                );
-            }
-            catch (System.Net.Http.HttpRequestException httpRequestException)
-            {
-                Logger.Log($"Error: {httpRequestException.Message} at {httpRequestException.StackTrace}");
-            }
+            SendMessage(to, textToSend);
         }
 
         static async void SendUserProfile(ChatId to, User user)
@@ -142,11 +132,16 @@ namespace ZhPPPSecretSantaTGBot
 
             Logger.Log($"Sending profile to {to}");
             Logger.Log(textToSend);
+            SendMessage(to, textToSend);
+        }
+
+        static async void SendMessage(ChatId to, string message)
+        {
             try
             {
                 await BotClient.SendTextMessageAsync(
                     chatId: to,
-                    text: textToSend
+                    text: message
                 );
             }
             catch (System.Net.Http.HttpRequestException httpRequestException)
