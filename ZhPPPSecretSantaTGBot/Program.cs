@@ -1,8 +1,6 @@
-using System;
+﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
@@ -96,13 +94,11 @@ namespace ZhPPPSecretSantaTGBot
                     case "/send_my_profile":
                         SendUserProfile(to, user);
                         break;
-                    default:
-                        break;
                 }
             }
         }
 
-        static async void SendMemo(ChatId to)
+        static void SendMemo(ChatId to)
         {
             string textToSend = "21.12 12:21 - закрытие регистрации\n" +
                                 "22-е - получение анкет\n" +
@@ -114,7 +110,7 @@ namespace ZhPPPSecretSantaTGBot
             SendMessage(to, textToSend);
         }
 
-        static async void SendUserProfile(ChatId to, User user)
+        static void SendUserProfile(ChatId to, User user)
         {
             string textToSend = "";
             textToSend += "Статус анкеты: ";
