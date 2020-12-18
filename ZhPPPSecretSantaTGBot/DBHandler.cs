@@ -106,6 +106,7 @@ namespace ZhPPPSecretSantaTGBot
             {
                 HasChanges = true;
             }
+
             WriteCounter++;
             if (WriteCounter >= WriteThreshold)
             {
@@ -122,7 +123,6 @@ namespace ZhPPPSecretSantaTGBot
                     Logger.Log("But no changes - skip");
                     WriteCounter = 0;
                 }
-                
             }
         }
 
@@ -183,21 +183,21 @@ namespace ZhPPPSecretSantaTGBot
 
                 return ref Users[0];
             }
-            else
+            
+            var oldSize = Users.Length;
+
+            User[] temp = Users;
+            Users = new User[oldSize + 1];
+            for (int i = 0; i < temp.Length; i++)
             {
-                var oldSize = Users.Length;
-
-                User[] temp = Users;
-                Users = new User[oldSize + 1];
-                for (int i = 0; i < temp.Length; i++)
-                {
-                    Users[i] = temp[i];
-                }
-
-                Users[oldSize] = user;
-
-                return ref Users[oldSize];
+                Users[i] = temp[i];
             }
+
+            Users[oldSize] = user;
+            
+            WriteCount();
+
+            return ref Users[oldSize];
         }
 
         private void OnProcessExit(object? sender, EventArgs e)
