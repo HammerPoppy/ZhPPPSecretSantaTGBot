@@ -8,6 +8,7 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using File = System.IO.File;
+// ReSharper disable StringLiteralTypo
 
 namespace ZhPPPSecretSantaTGBot
 {
