@@ -5,23 +5,25 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
+// ReSharper disable InconsistentNaming
+
 namespace ZhPPPSecretSantaTGBot
 {
     public class DBHandler
     {
-        private Logger Logger;
-        private XmlSerializer Serializer = new XmlSerializer(typeof(User[]));
+        private readonly Logger Logger;
+        private readonly XmlSerializer Serializer = new XmlSerializer(typeof(User[]));
         private FileStream fs;
 
         private int CurrentFileVersion;
         private int WriteCounter;
-        private int WriteThreshold = 5;
-        private int WriteCountDeltaSec = 12;
+        private const int WriteThreshold = 5;
+        private const int WriteCountDeltaSec = 12;
         private bool HasChanges;
 
         private bool AppClosing;
 
-        public User[] Users;
+        private User[] Users;
 
         public DBHandler(Logger logger)
         {
@@ -70,14 +72,7 @@ namespace ZhPPPSecretSantaTGBot
                 fs = new FileStream(filesList.Last(), FileMode.Open);
                 Users = (User[]) Serializer.Deserialize(fs);
                 fs.Close();
-                if (Users == null)
-                {
-                    Logger.Log($"Loaded 0 user profiles");
-                }
-                else
-                {
-                    Logger.Log($"Loaded {Users.Length} user profiles");
-                }
+                Logger.Log(Users == null ? "Loaded 0 user profiles" : $"Loaded {Users.Length} user profiles");
 
                 do
                 {
@@ -133,7 +128,7 @@ namespace ZhPPPSecretSantaTGBot
                 Logger.Log($"--- Writing to new file data\\{CurrentFileVersion}.txt");
                 fs = new FileStream($"data\\{CurrentFileVersion}.txt", FileMode.Create);
             }
-            catch (System.IO.IOException ioException)
+            catch (IOException ioException)
             {
                 Logger.Log($"Error: {ioException.Message} at {ioException.StackTrace}");
             }
@@ -183,7 +178,7 @@ namespace ZhPPPSecretSantaTGBot
 
                 return ref Users[0];
             }
-            
+
             var oldSize = Users.Length;
 
             User[] temp = Users;
@@ -194,13 +189,13 @@ namespace ZhPPPSecretSantaTGBot
             }
 
             Users[oldSize] = user;
-            
+
             WriteCount();
 
             return ref Users[oldSize];
         }
 
-        private void OnProcessExit(object? sender, EventArgs e)
+        private void OnProcessExit(object sender, EventArgs e)
         {
             AppClosing = true;
             Write();
