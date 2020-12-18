@@ -56,6 +56,7 @@ namespace ZhPPPSecretSantaTGBot
                     $"Received a text message in chat {e.Message.Chat.Id}|@{from.Username}|{from.FirstName} {from.LastName}");
                 Logger.Log(e.Message.Text);
 
+                // TODO detect non text
                 if (DBHandler.ContainsUser(from.Id))
                 {
                     var user = DBHandler.GetUserById(from.Id);
