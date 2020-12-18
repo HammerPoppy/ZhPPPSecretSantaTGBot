@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +9,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using File = System.IO.File;
 // ReSharper disable StringLiteralTypo
+// ReSharper disable InconsistentNaming
 
 namespace ZhPPPSecretSantaTGBot
 {
