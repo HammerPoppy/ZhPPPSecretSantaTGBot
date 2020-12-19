@@ -18,7 +18,7 @@ namespace ZhPPPSecretSantaTGBot
         private int CurrentFileVersion;
         private int WriteCounter;
         private const int WriteThreshold = 5;
-        private const int WriteCountDeltaSec = 12;
+        private const int WriteCountDeltaSec = 120;
         private bool HasChanges;
 
         private bool AppClosing;

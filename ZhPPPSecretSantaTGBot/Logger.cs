@@ -23,6 +23,7 @@ namespace ZhPPPSecretSantaTGBot
 
         public void Log(string message)
         {
+            // TODO handle exception
             string toWrite = $"{DateAndTime.Now.ToString()}| {message}";
             sr.WriteLine(toWrite);
             Console.WriteLine(toWrite);
