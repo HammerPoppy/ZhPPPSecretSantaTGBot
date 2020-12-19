@@ -43,13 +43,19 @@ namespace ZhPPPSecretSantaTGBot
 
             BotClient.OnMessage += Bot_OnMessage;
             BotClient.StartReceiving();
-
-            Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
-
-            Logger.Log("Ending execution by user command");
-
-            BotClient.StopReceiving();
+            
+            do
+            {
+                Console.WriteLine("Send exit to quit");
+                var command = Console.ReadLine();
+                switch (command)
+                {
+                    case "exit":
+                        Logger.Log("Ending execution by user command");
+                        BotClient.StopReceiving();
+                        return;
+                }
+            } while (true);
         }
 
         static async void Bot_OnMessage(object sender, MessageEventArgs e)
@@ -194,12 +200,12 @@ namespace ZhPPPSecretSantaTGBot
                                 Logger.Log($"Sending to {from}");
                                 Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
-                                
+
                                 await Task.Delay(TimeSpan.FromSeconds(0.2));
                                 AskProfileQuestion(chat, from, user);
                             }
-                            
                         }
+
                         break;
 
                     case "/abort_registration":
