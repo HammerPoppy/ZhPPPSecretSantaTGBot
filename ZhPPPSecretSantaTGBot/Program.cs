@@ -102,8 +102,8 @@ namespace ZhPPPSecretSantaTGBot
                         if (user.State == States.NewUser)
                         {
                             textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
                         }
                         else if (user.State == States.RegistrationStarted)
