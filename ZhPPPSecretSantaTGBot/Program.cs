@@ -160,14 +160,15 @@ namespace ZhPPPSecretSantaTGBot
                             textToSend = "К сожалению регистрация уже закрыта";
                             SendMessage(chat, textToSend);
                         }
-                        else if (localUser.State == States.NewUser)
+                        else switch (localUser.State)
                         {
-                            textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (localUser.State == States.RegistrationStarted)
-                        {
-                            AskProfileQuestion(chat, user, localUser);
+                            case States.NewUser:
+                                textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
+                                SendMessage(chat, textToSend);
+                                break;
+                            case States.RegistrationStarted:
+                                AskProfileQuestion(chat, user, localUser);
+                                break;
                         }
                         break;
 
