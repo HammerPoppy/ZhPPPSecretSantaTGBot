@@ -43,7 +43,7 @@ namespace ZhPPPSecretSantaTGBot
 
             BotClient.OnMessage += Bot_OnMessage;
             BotClient.StartReceiving();
-            
+
             do
             {
                 Console.WriteLine("Send exit to quit");
@@ -465,7 +465,7 @@ namespace ZhPPPSecretSantaTGBot
                                 "27-о вечером (ориентировочно) - получение подарков";
 
             Logger.Log($"Sending memo to {to}");
-            Logger.Log(textToSend);
+            Logger.Log("\n" + textToSend);
             SendMessage(to, textToSend);
         }
 
