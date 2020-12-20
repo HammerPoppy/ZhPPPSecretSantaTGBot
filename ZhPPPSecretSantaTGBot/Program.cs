@@ -504,8 +504,8 @@ namespace ZhPPPSecretSantaTGBot
             textToSend += "Мне не стоит дарить: ";
             textToSend += user.Ban + "\n";
 
-            Logger.Log($"Sending profile to {chat}");
-            Logger.Log("\n" + textToSend);
+            // Logger.Log($"Sending profile to {chat}");
+            // Logger.Log("\n" + textToSend);
             SendMessage(chat, textToSend);
         }
 
