@@ -143,8 +143,6 @@ namespace ZhPPPSecretSantaTGBot
                     Logger.Log($"Created new user {from.Username}");
                 }
 
-                // TODO from to chat migration
-
                 string textToSend;
                 switch (e.Message.Text)
                 {
