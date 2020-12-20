@@ -18,7 +18,7 @@ namespace ZhPPPSecretSantaTGBot
         private static Logger Logger;
         private static DBHandler DBHandler;
 
-        private static readonly DateTime SecondStageDateTime = new DateTime(2020, 12, 21, 12, 21, 00);
+        private static readonly DateTime SecondStageDateTime = new DateTime(2020, 11, 21, 12, 21, 00);
         private static bool IsInSecondStage;
 
         private static void Main()
@@ -383,8 +383,6 @@ namespace ZhPPPSecretSantaTGBot
                     // TODO non-in-registration response
 
                     default:
-                        Logger.Log($"{user} sent {e.Message.Text}");
-
                         if (localUser.State == States.RegistrationStarted)
                         {
                             Logger.Log($"{user} is in State RegistrationStarted");
