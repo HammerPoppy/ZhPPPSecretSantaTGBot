@@ -524,15 +524,14 @@ namespace ZhPPPSecretSantaTGBot
             }
         }
 
-        static void SendMemo(ChatId chat, Telegram.Bot.Types.User @from)
+        private static void SendMemo(ChatId chat, Telegram.Bot.Types.User user)
         {
-            string textToSend = "21.12 12:21 - закрытие регистрации\n" +
-                                "22-е - получение анкет\n" +
-                                "26-о вечером - отправка подарков\n" +
-                                "27-о вечером (ориентировочно) - получение подарков";
+            const string textToSend = "21.12 12:21 - закрытие регистрации\n" +
+                                      "22-е - получение анкет\n" +
+                                      "26-о вечером - отправка подарков\n" +
+                                      "27-о вечером (ориентировочно) - получение подарков";
 
-            Logger.Log($"Sending memo to {from}");
-            // Logger.Log("\n" + textToSend);
+            Logger.Log($"Sending memo to {user}");
             SendMessage(chat, textToSend);
         }
 
