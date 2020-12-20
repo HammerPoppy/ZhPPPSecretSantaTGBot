@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -185,37 +185,47 @@ namespace ZhPPPSecretSantaTGBot
                     case "/start_registration":
                         Logger.Log($"{user} asked for starting registration");
 
-                        if (localUser.State == States.RegistrationCompleted || localUser.State == States.TargetChosen ||
-                            localUser.State == States.TargetSent)
+                        if (IsInSecondStage)
                         {
-                            Logger.Log("But he completed his registration already");
-                            textToSend = "Вы уже завершили регистрацию, если вы хотите начать регистрацию заново, " +
-                                         "то сначала отмените прежнюю отправив команду /abort_registration ";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            Logger.Log($"But bot is in second stage, sending refuse message");
+                            textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
-                        else if (localUser.State == States.RegistrationStarted)
+                        else
                         {
-                            Logger.Log("But he started his registration already");
-                            textToSend = "Вы уже начали регистрацию. Чтобы отменить нынешнюю регистрацию " +
-                                         "отправьте команду /abort_registration, либо же /confirm_registration " +
-                                         "чтобы завершить нынешнюю";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (localUser.State == States.NewUser)
-                        {
-                            Logger.Log("He has state NewUser. Starting registration");
-                            localUser.State = States.RegistrationStarted;
-                            localUser.Stage = Stages.None;
-                            DBHandler.WriteCount();
+                            if (localUser.State == States.RegistrationCompleted ||
+                                localUser.State == States.TargetChosen ||
+                                localUser.State == States.TargetSent)
+                            {
+                                Logger.Log("But he completed his registration already");
+                                textToSend =
+                                    "Вы уже завершили регистрацию, если вы хотите начать регистрацию заново, " +
+                                    "то сначала отмените прежнюю отправив команду /abort_registration ";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.RegistrationStarted)
+                            {
+                                Logger.Log("But he started his registration already");
+                                textToSend = "Вы уже начали регистрацию. Чтобы отменить нынешнюю регистрацию " +
+                                             "отправьте команду /abort_registration, либо же /confirm_registration " +
+                                             "чтобы завершить нынешнюю";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.NewUser)
+                            {
+                                Logger.Log("He has state NewUser. Starting registration");
+                                localUser.State = States.RegistrationStarted;
+                                localUser.Stage = Stages.None;
+                                DBHandler.WriteCount();
 
-                            Logger.Log("Asking user a question");
-                            AskProfileQuestion(chat, user, localUser);
+                                Logger.Log("Asking user a question");
+                                AskProfileQuestion(chat, user, localUser);
+                            }
                         }
-
                         break;
 
                     case "/confirm_registration":
