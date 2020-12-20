@@ -187,7 +187,7 @@ namespace ZhPPPSecretSantaTGBot
                         else
                         {
                             Logger.Log($"{user} asked for target profile but he has no target, sending info message");
-                            SendMessage(chat, "Извините, у вас нету цели, если Вам нужна помощь - " +
+                            SendMessage(chat, "Извините, вам не назначена цель, если Вам нужна помощь - " +
                                               "пишите в наш аккаунт поддержки @bIudger");
                         }
 
