@@ -93,7 +93,7 @@ namespace ZhPPPSecretSantaTGBot
                 switch (e.Message.Text)
                 {
                     case "/start":
-                        SendIntroMessages(chat);
+                        SendIntroMessages(chat, from);
 
                         await Task.Delay(TimeSpan.FromSeconds(4));
 
@@ -509,14 +509,14 @@ namespace ZhPPPSecretSantaTGBot
             SendMessage(chat, textToSend);
         }
 
-        static async void SendIntroMessages(ChatId to)
+        static async void SendIntroMessages(ChatId chat, Telegram.Bot.Types.User @from)
         {
             double sendOffsetInSecs = 0.3;
-            Logger.Log($"Sending intro messages to {to}");
+            Logger.Log($"Sending intro messages to {from}");
 
             string textToSend = "Приветствуем Вас в боте Секретного Санты ЖППП!";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend =
@@ -524,7 +524,7 @@ namespace ZhPPPSecretSantaTGBot
                 " касательно Секретного Санты 2020 by Zhopki Popki©! <i>главный админ убьет меня за такое название ну не" +
                 " важно давайте начинать уже там целая простынь текста дальше...</i>";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend =
@@ -532,7 +532,7 @@ namespace ZhPPPSecretSantaTGBot
                 " Прессы решили, что разумнее всего будет провести данный ивент с некоторыми поправками, касающимися" +
                 " доставки подарков. И ДА - подарки будут отправляться по почте :(";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "И тут есть два момента: во-первых - Вы не сможете ехидно пронаблюдать за тем как кто-то" +
@@ -540,14 +540,14 @@ namespace ZhPPPSecretSantaTGBot
                          " но на этот счет мы попробуем кое-что предпринять; а во-вторых это то, что человек," +
                          " принимающий подарок, сможет узнать от кого получил подарок (из-за накладной).";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "<i>(Кто-то по секрету сказал что можно попробовать на почте при отправке указать не Ваши" +
                          " а абсолютно рандомные данные и таким образом остаться анонимным, однако этот вариант" +
                          " стоит рассматривать только для энтузиастов и вообще обязательным не является)</i>";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "Ладно, давайте перейдем к делу. Для начала Вам нужно будет заполнить небольшую анкету," +
@@ -558,7 +558,7 @@ namespace ZhPPPSecretSantaTGBot
                          "А также некоторая информация для человека который будет дарить, дабы ни у кого " +
                          "не было проблем с выбором подарка";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "Форма для регистрации будет открыта до 21.12 12:21 (поторопитесь, попингуйте-потэгайте" +
@@ -566,7 +566,7 @@ namespace ZhPPPSecretSantaTGBot
                          " днем Вам придет анкета того кому Вы будете дарить подарок. Далее Вы готовите подарок " +
                          "и отправляете его 26-о числа (по-возможности так чтоб посылка пришла получателю 27-о числа).";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "Ориентировочно 27-о числа вечером Вам приходит посылочка и Вы идете ее забираете. " +
@@ -575,7 +575,7 @@ namespace ZhPPPSecretSantaTGBot
                          "другим образом. Так каждый сможет понаблюдать за получателем подарка и все разделят " +
                          "радость праздника с другими.";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "Касательно подарка - это может быть что угодно, главное чтоб было весело и " +
@@ -584,7 +584,7 @@ namespace ZhPPPSecretSantaTGBot
                          "отправку посылки. К тому же это стоит учитывать при упаковке подарка, например всякие " +
                          "банты на коробках по любому помнут на почте если не предпринять какие-то меры 😭. <i>Банты топ.</i>";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "И на этом наконец все! Совсем скоро Вы уже начнете заполнять анкету, но перед этим " +
@@ -594,12 +594,12 @@ namespace ZhPPPSecretSantaTGBot
                          " - @bIudger, и мы постараемся помочь Вам в ближайшее время. " +
                          "Иии да, можете уже заполнять анкету, удачи Вам с подготовкой подарка и счастливых праздников 🥳!";
             // Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "С любовью, редакция @ppidory <i>(ахвахвхахв у нас внатуре тэг канала - ПИПИДОРЫ)</i>";
-            Logger.Log(textToSend);
-            SendMessage(to, textToSend);
+            // Logger.Log(textToSend);
+            SendMessage(chat, textToSend);
         }
 
         static async void SendMessage(ChatId to, string message)
