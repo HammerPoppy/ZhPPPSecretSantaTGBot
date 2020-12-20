@@ -242,8 +242,6 @@ namespace ZhPPPSecretSantaTGBot
                             {
                                 Logger.Log("But he completed his registration already");
                                 textToSend = "Вы уже завершили регистрацию. :)";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else if (localUser.State == States.NewUser)
@@ -251,8 +249,6 @@ namespace ZhPPPSecretSantaTGBot
                                 Logger.Log("But he didnt start registration");
                                 textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
                                              "отправьте /start_registration";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else if (localUser.State == States.RegistrationStarted)
@@ -268,8 +264,6 @@ namespace ZhPPPSecretSantaTGBot
                                         "для того чтобы посмотреть свою анкету отправьте команду " +
                                         "/send_my_profile, чтобы изменить что-то в анкете отправьте " +
                                         "/abort_registration и заполните ее заново 👹";
-                                    // Logger.Log($"Sending to {from}");
-                                    // Logger.Log(textToSend);
                                     SendMessage(chat, textToSend);
 
                                     localUser.State = States.RegistrationCompleted;
@@ -281,8 +275,6 @@ namespace ZhPPPSecretSantaTGBot
                                     Logger.Log($"{user} has another than Ban Stage so cant complite his registration");
                                     textToSend =
                                         "Вы еще не закончили регистрацию, пожалуйста заполните анкету до конца.";
-                                    // Logger.Log($"Sending to {from}");
-                                    // Logger.Log(textToSend);
                                     SendMessage(chat, textToSend);
 
                                     await Task.Delay(TimeSpan.FromSeconds(0.2));
