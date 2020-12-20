@@ -393,7 +393,7 @@ namespace ZhPPPSecretSantaTGBot
                     break;
 
                 case Stages.StageOffName:
-                    Logger.Log("User is on None stage, asking Phone question");
+                    Logger.Log("User is on Name stage, asking Phone question");
                     textToSend = "Номер телефона (необходим для отправки посылки)";
                     Logger.Log($"Sending to {from}");
                     Logger.Log(textToSend);
@@ -401,7 +401,7 @@ namespace ZhPPPSecretSantaTGBot
                     break;
 
                 case Stages.StagePhone:
-                    Logger.Log("User is on None stage, asking Post question");
+                    Logger.Log("User is on Phone stage, asking Post question");
                     textToSend = "Город и номер отделения НП (или подробно описать другой метод доставки)";
                     Logger.Log($"Sending to {from}");
                     Logger.Log(textToSend);
@@ -409,7 +409,7 @@ namespace ZhPPPSecretSantaTGBot
                     break;
 
                 case Stages.StagePost:
-                    Logger.Log("User is on None stage, asking Fan question");
+                    Logger.Log("User is on Post stage, asking Fan question");
                     textToSend = "Теперь пара вопросов для того чтобы можно было получше выбрать Вам подарок";
                     Logger.Log($"Sending to {from}");
                     Logger.Log(textToSend);
@@ -424,7 +424,7 @@ namespace ZhPPPSecretSantaTGBot
                     break;
 
                 case Stages.StageFan:
-                    Logger.Log("User is on None stage, asking Ban question");
+                    Logger.Log("User is on Fan stage, asking Ban question");
                     textToSend = "А теперь укажите что Вам лучше не дарить " +
                                  "<i>(конечно можете пропустить этот пункт (тогда напишите что-то типа " +
                                  "\"Все равно...\"), но любой Ваш отзыв обязательно обработают и учтут наши " +
@@ -435,7 +435,7 @@ namespace ZhPPPSecretSantaTGBot
                     break;
 
                 case Stages.StageBan:
-                    Logger.Log("User is on None stage, asking registration confirmation");
+                    Logger.Log("User is on Ban stage, asking registration confirmation");
                     textToSend = "Отлично, это были все вопросы на которые необходимо было ответить! " +
                                  "Теперь проверьте Вашу анкету еще раз потому, что после подтверждения " +
                                  "изменить ответы через бот невозможно:";
