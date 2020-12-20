@@ -201,8 +201,6 @@ namespace ZhPPPSecretSantaTGBot
                                 textToSend =
                                     "Вы уже завершили регистрацию, если вы хотите начать регистрацию заново, " +
                                     "то сначала отмените прежнюю отправив команду /abort_registration ";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else if (localUser.State == States.RegistrationStarted)
@@ -211,8 +209,6 @@ namespace ZhPPPSecretSantaTGBot
                                 textToSend = "Вы уже начали регистрацию. Чтобы отменить нынешнюю регистрацию " +
                                              "отправьте команду /abort_registration, либо же /confirm_registration " +
                                              "чтобы завершить нынешнюю";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else if (localUser.State == States.NewUser)
