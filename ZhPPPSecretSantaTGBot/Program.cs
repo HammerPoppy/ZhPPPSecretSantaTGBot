@@ -465,8 +465,8 @@ namespace ZhPPPSecretSantaTGBot
                                 "26-о вечером - отправка подарков\n" +
                                 "27-о вечером (ориентировочно) - получение подарков";
 
-            Logger.Log($"Sending memo to {to}");
-            Logger.Log("\n" + textToSend);
+            // Logger.Log($"Sending memo to {to}");
+            // Logger.Log("\n" + textToSend);
             SendMessage(to, textToSend);
         }
 
