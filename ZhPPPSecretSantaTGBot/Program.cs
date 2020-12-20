@@ -384,9 +384,10 @@ namespace ZhPPPSecretSantaTGBot
 
                     default:
                         Logger.Log($"{user} sent {e.Message.Text}");
+                        
                         if (localUser.State == States.RegistrationStarted)
                         {
-                            Logger.Log("He is in State RegistrationStarted");
+                            Logger.Log($"{user} is in State RegistrationStarted");
                             switch (localUser.Stage)
                             {
                                 case Stages.None:
@@ -439,8 +440,6 @@ namespace ZhPPPSecretSantaTGBot
                                         $"{user} is on Ban stage, sending him info about registration confirmation");
                                     textToSend = "Проверьте Вашу анкету еще раз потому, что после подтверждения " +
                                                  "изменить ответы через бот невозможно:";
-                                    // Logger.Log($"Sending to {from}");
-                                    // Logger.Log(textToSend);
                                     SendMessage(chat, textToSend);
 
                                     await Task.Delay(TimeSpan.FromSeconds(0.2));
@@ -450,8 +449,6 @@ namespace ZhPPPSecretSantaTGBot
                                     textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
                                                  "если же хотите что-то изменить, то нажмите команду /abort_registration " +
                                                  "и заполните заново 👹";
-                                    // Logger.Log($"Sending to {from}");
-                                    // Logger.Log(textToSend);
                                     SendMessage(chat, textToSend);
                                     break;
                             }
