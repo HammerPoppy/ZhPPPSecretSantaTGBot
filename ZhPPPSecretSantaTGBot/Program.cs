@@ -179,6 +179,20 @@ namespace ZhPPPSecretSantaTGBot
                         SendUserProfile(chat, localUser, user);
                         break;
 
+                    case "/send_target_profile":
+                        if (localUser.State == States.TargetChosen || localUser.State == States.TargetSent)
+                        {
+                            SendTargetProfile(chat, localUser, DBHandler.GetUserById(localUser.TargetId), user);
+                        }
+                        else
+                        {
+                            Logger.Log($"{user} asked for target profile but he has no target, sending info message");
+                            SendMessage(chat, "Извините, у вас нету цели, если Вам нужна помощь - " +
+                                              "пишите в наш аккаунт поддержки @bIudger");
+                        }
+
+                        break;
+
                     case "/start_registration":
                         Logger.Log($"{user} asked for starting registration");
 
@@ -594,6 +608,8 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(
                 $"{user} Sending target (@{targetUser.Username ?? $"{targetUser.FirstName} {targetUser.LastName}"}) profile");
             SendMessage(chat, textToSend);
+            localUser.State = States.TargetSent;
+            DBHandler.WriteCount();
         }
 
         private static async void SendIntroMessages(ChatId chat, Telegram.Bot.Types.User user)
