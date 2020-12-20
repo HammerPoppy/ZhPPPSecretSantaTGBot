@@ -385,62 +385,62 @@ namespace ZhPPPSecretSantaTGBot
             switch (user.Stage)
             {
                 case Stages.None:
-                    Logger.Log("User is on None stage, asking Name question");
+                    Logger.Log($"{from} is on None stage, asking Name question");
                     textToSend = "ФИО (полное, на рідній или русском)";
-                    Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log($"Sending to {from}");
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StageOffName:
-                    Logger.Log("User is on Name stage, asking Phone question");
+                    Logger.Log($"{from} is on Name stage, asking Phone question");
                     textToSend = "Номер телефона (необходим для отправки посылки)";
-                    Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log($"Sending to {from}");
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StagePhone:
-                    Logger.Log("User is on Phone stage, asking Post question");
+                    Logger.Log($"{from} is on Phone stage, asking Post question");
                     textToSend = "Город и номер отделения НП (или подробно описать другой метод доставки)";
-                    Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log($"Sending to {from}");
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StagePost:
-                    Logger.Log("User is on Post stage, asking Fan question");
+                    Logger.Log($"{from} is on Post stage, asking Fan question");
                     textToSend = "Теперь пара вопросов для того чтобы можно было получше выбрать Вам подарок";
-                    Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log($"Sending to {from}");
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
 
                     await Task.Delay(TimeSpan.FromSeconds(0.2));
                     textToSend = "Опишите фанатом чего вы являетесь (например Гарри Поттер, Initial D, " +
                                  "Гречка (ну та которая музыку поет), Райан Гослинг)";
-                    Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log($"Sending to {from}");
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StageFan:
-                    Logger.Log("User is on Fan stage, asking Ban question");
+                    Logger.Log($"{from} is on Fan stage, asking Ban question");
                     textToSend = "А теперь укажите что Вам лучше не дарить " +
                                  "<i>(конечно можете пропустить этот пункт (тогда напишите что-то типа " +
                                  "\"Все равно...\"), но любой Ваш отзыв обязательно обработают и учтут наши " +
                                  "сотрудники отдела качества)</i>";
-                    Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log($"Sending to {from}");
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StageBan:
-                    Logger.Log("User is on Ban stage, asking registration confirmation");
+                    Logger.Log($"{from} is on Ban stage, asking registration confirmation");
                     textToSend = "Отлично, это были все вопросы на которые необходимо было ответить! " +
                                  "Теперь проверьте Вашу анкету еще раз потому, что после подтверждения " +
                                  "изменить ответы через бот невозможно:";
-                    Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log($"Sending to {from}");
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
 
                     await Task.Delay(TimeSpan.FromSeconds(0.2));
@@ -451,7 +451,7 @@ namespace ZhPPPSecretSantaTGBot
                                  "если же хотите что-то изменить, то нажмите команду /abort_registration " +
                                  "и заполните заново 👹";
                     Logger.Log($"Sending to {from}");
-                    Logger.Log(textToSend);
+                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
             }
