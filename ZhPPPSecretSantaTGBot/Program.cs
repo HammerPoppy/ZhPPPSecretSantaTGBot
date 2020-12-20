@@ -383,6 +383,7 @@ namespace ZhPPPSecretSantaTGBot
         private static async void AskProfileQuestion(Chat chat, Telegram.Bot.Types.User from, User user)
         {
             string textToSend;
+            Logger.Log($"Asking {from} next question");
             switch (user.Stage)
             {
                 case Stages.None:
