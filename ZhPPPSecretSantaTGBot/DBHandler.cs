@@ -50,7 +50,7 @@ namespace ZhPPPSecretSantaTGBot
                 Logger.Log($"Creating new data file data\\{CurrentFileVersion}.txt");
                 fs = new FileStream($"data\\{CurrentFileVersion}.txt", FileMode.Create);
                 fs.Close();
-                WriteCount();
+                Write();
             }
             else
             {
