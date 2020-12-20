@@ -94,12 +94,12 @@ namespace ZhPPPSecretSantaTGBot
                         break;
                     case "send registratiom end reminder":
                         var users = DBHandler.Users;
-                        for (int i = 0; i < users.Length; i++)
+                        foreach (var user in users)
                         {
-                            if (users[i].State == States.NewUser || users[i].State == States.RegistrationStarted)
+                            if (user.State == States.NewUser || user.State == States.RegistrationStarted)
                             {
                                 var difference = SecondStageDateTime - DateTime.Now;
-                                SendMessage(users[i].Id, $"Напоминаем, что конец регистрации уже через {(int)difference.TotalMinutes} минут");
+                                SendMessage(user.Id, $"Напоминаем, что конец регистрации уже через {(int)difference.TotalMinutes} минут");
                             }
                         }
                         break;
