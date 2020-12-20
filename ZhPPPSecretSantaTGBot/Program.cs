@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -54,12 +53,30 @@ namespace ZhPPPSecretSantaTGBot
             {
                 Logger.Log("Bot are in first stage");
             }
-                new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
-                new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
-                new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
-                new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
-                new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
-            });
+
+            if (IsInSecondStage)
+            {
+                Logger.Log("Setting second stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "send_target_profile ", Description = "посмотреть анкету цели"}
+                });
+            }
+            else
+            {
+                Logger.Log("Setting first stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
+                    new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
+                });
+            }
 
             BotClient.OnMessage += Bot_OnMessage;
             BotClient.StartReceiving();
