@@ -128,7 +128,8 @@ namespace ZhPPPSecretSantaTGBot
                             user.State == States.TargetSent)
                         {
                             Logger.Log("But he completed his registration already");
-                            textToSend = "Вы уже завершили регистрацию.";
+                            textToSend = "Вы уже завершили регистрацию, если вы хотите начать регистрацию заново, " +
+                                         "то сначала отмените прежнюю отправив команду /abort_registration ";
                             // Logger.Log($"Sending to {from}");
                             // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
@@ -137,7 +138,8 @@ namespace ZhPPPSecretSantaTGBot
                         {
                             Logger.Log("But he started his registration already");
                             textToSend = "Вы уже начали регистрацию. Чтобы отменить нынешнюю регистрацию " +
-                                         "отправьте команду /abort_registration";
+                                         "отправьте команду /abort_registration, либо же /confirm_registration " +
+                                         "чтобы завершить нынешнюю";
                             // Logger.Log($"Sending to {from}");
                             // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
@@ -170,7 +172,8 @@ namespace ZhPPPSecretSantaTGBot
                         else if (user.State == States.NewUser)
                         {
                             Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию";
+                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                         "отправьте /start_registration";
                             // Logger.Log($"Sending to {from}");
                             // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
@@ -184,7 +187,9 @@ namespace ZhPPPSecretSantaTGBot
                                              "когда бот пришлет анкету Вашей жертвы. Если Вам нужна будет помощь " +
                                              "или есть какие-то серьезные вопросы, то пишите сюда @bIudger. Для того " +
                                              "чтобы еще раз посмотреть памятку по датам отправьте команду /send_memo, " +
-                                             "для того чтобы посмотреть свою анкету отправьте команду /send_my_profile";
+                                             "для того чтобы посмотреть свою анкету отправьте команду " +
+                                             "/send_my_profile, чтобы изменить что-то в анкете отправьте " +
+                                             "/abort_registration и заполните ее заново 👹";
                                 // Logger.Log($"Sending to {from}");
                                 // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
@@ -211,12 +216,12 @@ namespace ZhPPPSecretSantaTGBot
                     case "/abort_registration":
                         Logger.Log($"{from} asked for aborting registration");
 
-                        if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
+                        if (user.State == States.TargetChosen ||
                             user.State == States.TargetSent)
                         {
-                            Logger.Log("But he completed his registration so profile cant be deleted");
-                            textToSend = "Вы уже завершили регистрацию и не можете удалить свою анкету. " +
-                                         "Если Вы все же хотите ее удалить, обращайтесь в наш аккаунт поддержки @bIudger";
+                            Logger.Log("But he had recieve target so his profile cant be deleted");
+                            textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
+                                         "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
                             // Logger.Log($"Sending to {from}");
                             // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
@@ -224,7 +229,8 @@ namespace ZhPPPSecretSantaTGBot
                         else if (user.State == States.NewUser)
                         {
                             Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию";
+                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                         "отправьте /start_registration";
                             // Logger.Log($"Sending to {from}");
                             // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
@@ -244,12 +250,12 @@ namespace ZhPPPSecretSantaTGBot
                     case "/confirm_abort_registration":
                         Logger.Log($"{from} tried to confirm aborting registration");
 
-                        if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
+                        if (user.State == States.TargetChosen ||
                             user.State == States.TargetSent)
                         {
-                            Logger.Log("But he completed his registration so profile cant be deleted");
-                            textToSend = "Вы уже завершили регистрацию и не можете удалить свою анкету. " +
-                                         "Если Вы все же хотите ее удалить, обращайтесь в наш аккаунт поддержки @bIudger";
+                            Logger.Log("But he had recieve target so his profile cant be deleted");
+                            textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
+                                         "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
                             // Logger.Log($"Sending to {from}");
                             // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
@@ -257,7 +263,8 @@ namespace ZhPPPSecretSantaTGBot
                         else if (user.State == States.NewUser)
                         {
                             Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию";
+                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                         "отправьте /start_registration";
                             // Logger.Log($"Sending to {from}");
                             // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
@@ -296,7 +303,6 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     // TODO non-in-registration response
-                    // TODO replace all text user to from reference
 
                     default:
                         Logger.Log($"{from} sent {e.Message.Text}");
