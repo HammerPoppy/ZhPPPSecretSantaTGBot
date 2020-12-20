@@ -12,7 +12,7 @@ using File = System.IO.File;
 
 namespace ZhPPPSecretSantaTGBot
 {
-    class Program
+    internal static class Program
     {
         private static ITelegramBotClient BotClient;
         private static Logger Logger;
@@ -21,7 +21,7 @@ namespace ZhPPPSecretSantaTGBot
         private static readonly DateTime SecondStageDateTime = new DateTime(2020, 12, 21, 12, 21, 00);
         private static bool IsInSecondStage;
 
-        static void Main()
+        private static void Main()
         {
             Logger = new Logger();
             DBHandler = new DBHandler(Logger);
@@ -655,12 +655,12 @@ namespace ZhPPPSecretSantaTGBot
             SendMessage(chat, textToSend);
         }
 
-        static async void SendMessage(ChatId to, string message)
+        private static async void SendMessage(ChatId chat, string message)
         {
             try
             {
                 await BotClient.SendTextMessageAsync(
-                    chatId: to,
+                    chatId: chat,
                     text: message,
                     parseMode: ParseMode.Html
                 );
