@@ -97,7 +97,7 @@ namespace ZhPPPSecretSantaTGBot
 
                         await Task.Delay(TimeSpan.FromSeconds(4));
 
-                        SendMemo(chat);
+                        SendMemo(chat, from);
 
                         if (user.State == States.NewUser)
                         {
@@ -114,7 +114,7 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     case "/send_memo":
-                        SendMemo(chat);
+                        SendMemo(chat, from);
                         break;
 
                     case "/send_my_profile":
@@ -458,16 +458,16 @@ namespace ZhPPPSecretSantaTGBot
             }
         }
 
-        static void SendMemo(ChatId to)
+        static void SendMemo(ChatId chat, Telegram.Bot.Types.User @from)
         {
             string textToSend = "21.12 12:21 - закрытие регистрации\n" +
                                 "22-е - получение анкет\n" +
                                 "26-о вечером - отправка подарков\n" +
                                 "27-о вечером (ориентировочно) - получение подарков";
 
-            // Logger.Log($"Sending memo to {to}");
+            Logger.Log($"Sending memo to {from}");
             // Logger.Log("\n" + textToSend);
-            SendMessage(to, textToSend);
+            SendMessage(chat, textToSend);
         }
 
         static void SendUserProfile(ChatId chat, User user)
