@@ -296,7 +296,6 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     // TODO non-in-registration response
-                    // TODO replace all text user to from reference
 
                     default:
                         Logger.Log($"{from} sent {e.Message.Text}");
