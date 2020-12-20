@@ -118,7 +118,7 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     case "/send_my_profile":
-                        SendUserProfile(chat, user);
+                        SendUserProfile(chat, user, from);
                         break;
 
                     case "/start_registration":
@@ -290,7 +290,7 @@ namespace ZhPPPSecretSantaTGBot
                             SendMessage(chat, textToSend);
 
                             await Task.Delay(TimeSpan.FromSeconds(0.2));
-                            SendUserProfile(chat, user);
+                            SendUserProfile(chat, user, from);
                         }
 
                         break;
@@ -360,7 +360,7 @@ namespace ZhPPPSecretSantaTGBot
                                     SendMessage(chat, textToSend);
 
                                     await Task.Delay(TimeSpan.FromSeconds(0.2));
-                                    SendUserProfile(chat, user);
+                                    SendUserProfile(chat, user, from);
 
                                     await Task.Delay(TimeSpan.FromSeconds(0.2));
                                     textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
@@ -445,7 +445,7 @@ namespace ZhPPPSecretSantaTGBot
                     SendMessage(chat, textToSend);
 
                     await Task.Delay(TimeSpan.FromSeconds(0.2));
-                    SendUserProfile(chat, user);
+                    SendUserProfile(chat, user, from);
 
                     await Task.Delay(TimeSpan.FromSeconds(0.2));
                     textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
@@ -470,7 +470,7 @@ namespace ZhPPPSecretSantaTGBot
             SendMessage(chat, textToSend);
         }
 
-        static void SendUserProfile(ChatId chat, User user)
+        static void SendUserProfile(ChatId chat, User user, Telegram.Bot.Types.User @from)
         {
             string textToSend = "";
             textToSend += "Статус анкеты: ";
@@ -504,7 +504,7 @@ namespace ZhPPPSecretSantaTGBot
             textToSend += "Мне не стоит дарить: ";
             textToSend += user.Ban + "\n";
 
-            // Logger.Log($"Sending profile to {chat}");
+            Logger.Log($"Sending profile to {from}");
             // Logger.Log("\n" + textToSend);
             SendMessage(chat, textToSend);
         }
