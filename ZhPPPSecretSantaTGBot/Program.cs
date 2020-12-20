@@ -288,33 +288,42 @@ namespace ZhPPPSecretSantaTGBot
                     case "/abort_registration":
                         Logger.Log($"{user} asked for aborting registration");
 
-                        if (localUser.State == States.TargetChosen ||
-                            localUser.State == States.TargetSent)
+                        if (IsInSecondStage)
                         {
-                            Logger.Log("But he had recieve target so his profile cant be deleted");
-                            textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
-                                         "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (localUser.State == States.NewUser)
-                        {
-                            Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
-                                         "отправьте /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            Logger.Log($"But bot is in second stage, sending refuse message");
+                            textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
                         else
                         {
-                            textToSend =
-                                "Вы хотите отменить регистрацию. Это очистит все поля в вашей анкете, вы уверены?\n" +
-                                "Для подтверждения отправьте команду /confirm_abort_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
+                            if (localUser.State == States.TargetChosen ||
+                                localUser.State == States.TargetSent)
+                            {
+                                Logger.Log("But he had recieve target so his profile cant be deleted");
+                                textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
+                                             "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.NewUser)
+                            {
+                                Logger.Log("But he didnt start registration");
+                                textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                             "отправьте /start_registration";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
+                            }
+                            else
+                            {
+                                textToSend =
+                                    "Вы хотите отменить регистрацию. Это очистит все поля в вашей анкете, вы уверены?\n" +
+                                    "Для подтверждения отправьте команду /confirm_abort_registration";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
+                            }
                         }
 
                         break;
@@ -322,54 +331,63 @@ namespace ZhPPPSecretSantaTGBot
                     case "/confirm_abort_registration":
                         Logger.Log($"{user} tried to confirm aborting registration");
 
-                        if (localUser.State == States.TargetChosen ||
-                            localUser.State == States.TargetSent)
+                        if (IsInSecondStage)
                         {
-                            Logger.Log("But he had recieve target so his profile cant be deleted");
-                            textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
-                                         "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (localUser.State == States.NewUser)
-                        {
-                            Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
-                                         "отправьте /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            Logger.Log($"But bot is in second stage, sending refuse message");
+                            textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
                         else
                         {
-                            Logger.Log("Wiping user answers...");
-                            localUser.OfficialName = null;
-                            Logger.Log("--OfficialName");
-                            localUser.Phone = null;
-                            Logger.Log("--Phone");
-                            localUser.Post = null;
-                            Logger.Log("--Post");
-                            localUser.FanOf = null;
-                            Logger.Log("--FanOf");
-                            localUser.Ban = null;
-                            Logger.Log("--Ban");
-                            Logger.Log("Done");
-                            DBHandler.WriteCount();
+                            if (localUser.State == States.TargetChosen ||
+                                localUser.State == States.TargetSent)
+                            {
+                                Logger.Log("But he had recieve target so his profile cant be deleted");
+                                textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
+                                             "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.NewUser)
+                            {
+                                Logger.Log("But he didnt start registration");
+                                textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                             "отправьте /start_registration";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
+                            }
+                            else
+                            {
+                                Logger.Log("Wiping user answers...");
+                                localUser.OfficialName = null;
+                                Logger.Log("--OfficialName");
+                                localUser.Phone = null;
+                                Logger.Log("--Phone");
+                                localUser.Post = null;
+                                Logger.Log("--Post");
+                                localUser.FanOf = null;
+                                Logger.Log("--FanOf");
+                                localUser.Ban = null;
+                                Logger.Log("--Ban");
+                                Logger.Log("Done");
+                                DBHandler.WriteCount();
 
-                            localUser.State = States.NewUser;
-                            localUser.Stage = Stages.None;
-                            DBHandler.WriteCount();
+                                localUser.State = States.NewUser;
+                                localUser.Stage = Stages.None;
+                                DBHandler.WriteCount();
 
-                            Logger.Log($"Successfully wiped {user} profile");
-                            textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
-                                         "Чтобы начать регистрацию отправьте команду /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
+                                Logger.Log($"Successfully wiped {user} profile");
+                                textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
+                                             "Чтобы начать регистрацию отправьте команду /start_registration";
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
+                                SendMessage(chat, textToSend);
 
-                            await Task.Delay(TimeSpan.FromSeconds(0.2));
-                            SendUserProfile(chat, localUser, user);
+                                await Task.Delay(TimeSpan.FromSeconds(0.2));
+                                SendUserProfile(chat, localUser, user);
+                            }
                         }
 
                         break;
