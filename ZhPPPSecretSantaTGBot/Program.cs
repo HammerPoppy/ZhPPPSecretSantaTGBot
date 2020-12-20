@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -160,16 +160,18 @@ namespace ZhPPPSecretSantaTGBot
                             textToSend = "К сожалению регистрация уже закрыта";
                             SendMessage(chat, textToSend);
                         }
-                        else switch (localUser.State)
-                        {
-                            case States.NewUser:
-                                textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
-                                SendMessage(chat, textToSend);
-                                break;
-                            case States.RegistrationStarted:
-                                AskProfileQuestion(chat, user, localUser);
-                                break;
-                        }
+                        else
+                            switch (localUser.State)
+                            {
+                                case States.NewUser:
+                                    textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
+                                    SendMessage(chat, textToSend);
+                                    break;
+                                case States.RegistrationStarted:
+                                    AskProfileQuestion(chat, user, localUser);
+                                    break;
+                            }
+
                         break;
 
                     case "/send_memo":
