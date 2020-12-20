@@ -187,7 +187,7 @@ namespace ZhPPPSecretSantaTGBot
 
                         if (IsInSecondStage)
                         {
-                            Logger.Log( $"{user} But bot is in second stage, sending refuse message");
+                            Logger.Log($"{user} But bot is in second stage, sending refuse message");
                             textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
@@ -384,73 +384,80 @@ namespace ZhPPPSecretSantaTGBot
 
                     default:
                         Logger.Log($"{user} sent {e.Message.Text}");
-                        
+
                         if (localUser.State == States.RegistrationStarted)
                         {
                             Logger.Log($"{user} is in State RegistrationStarted");
-                            switch (localUser.Stage)
+                            if (IsInSecondStage)
                             {
-                                case Stages.None:
-                                    Logger.Log($"{user} is on None stage, saving his answer to Name");
-                                    localUser.OfficialName = e.Message.Text;
-                                    Logger.Log($"{user} setting Stage to Name");
-                                    localUser.Stage = Stages.StageOffName;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, user, localUser);
-                                    break;
+                                Logger.Log($"{user} But bot is in second stage, ignoring");
+                            }
+                            else
+                            {
+                                switch (localUser.Stage)
+                                {
+                                    case Stages.None:
+                                        Logger.Log($"{user} is on None stage, saving his answer to Name");
+                                        localUser.OfficialName = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Name");
+                                        localUser.Stage = Stages.StageOffName;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StageOffName:
-                                    Logger.Log($"{user} is on Name stage, saving his answer to Phone");
-                                    localUser.Phone = e.Message.Text;
-                                    Logger.Log($"{user} setting Stage to Phone");
-                                    localUser.Stage = Stages.StagePhone;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, user, localUser);
-                                    break;
+                                    case Stages.StageOffName:
+                                        Logger.Log($"{user} is on Name stage, saving his answer to Phone");
+                                        localUser.Phone = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Phone");
+                                        localUser.Stage = Stages.StagePhone;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StagePhone:
-                                    Logger.Log($"{user} is on Phone stage, saving his answer to Post");
-                                    localUser.Post = e.Message.Text;
-                                    Logger.Log($"{user} setting Stage to Post");
-                                    localUser.Stage = Stages.StagePost;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, user, localUser);
-                                    break;
+                                    case Stages.StagePhone:
+                                        Logger.Log($"{user} is on Phone stage, saving his answer to Post");
+                                        localUser.Post = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Post");
+                                        localUser.Stage = Stages.StagePost;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StagePost:
-                                    Logger.Log($"{user} is on Post stage, saving his answer to Fan");
-                                    localUser.FanOf = e.Message.Text;
-                                    Logger.Log($"{user} setting Stage to Fan");
-                                    localUser.Stage = Stages.StageFan;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, user, localUser);
-                                    break;
+                                    case Stages.StagePost:
+                                        Logger.Log($"{user} is on Post stage, saving his answer to Fan");
+                                        localUser.FanOf = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Fan");
+                                        localUser.Stage = Stages.StageFan;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StageFan:
-                                    Logger.Log($"{user} is on Fan stage, saving his answer to Ban");
-                                    localUser.Ban = e.Message.Text;
-                                    Logger.Log($"{user} setting Stage to Ban");
-                                    localUser.Stage = Stages.StageBan;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, user, localUser);
-                                    break;
+                                    case Stages.StageFan:
+                                        Logger.Log($"{user} is on Fan stage, saving his answer to Ban");
+                                        localUser.Ban = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Ban");
+                                        localUser.Stage = Stages.StageBan;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StageBan:
-                                    Logger.Log(
-                                        $"{user} is on Ban stage, sending him info about registration confirmation");
-                                    textToSend = "Проверьте Вашу анкету еще раз потому, что после подтверждения " +
-                                                 "изменить ответы через бот невозможно:";
-                                    SendMessage(chat, textToSend);
+                                    case Stages.StageBan:
+                                        Logger.Log(
+                                            $"{user} is on Ban stage, sending him info about registration confirmation");
+                                        textToSend = "Проверьте Вашу анкету еще раз потому, что после подтверждения " +
+                                                     "изменить ответы через бот невозможно:";
+                                        SendMessage(chat, textToSend);
 
-                                    await Task.Delay(TimeSpan.FromSeconds(0.2));
-                                    SendUserProfile(chat, localUser, user);
+                                        await Task.Delay(TimeSpan.FromSeconds(0.2));
+                                        SendUserProfile(chat, localUser, user);
 
-                                    await Task.Delay(TimeSpan.FromSeconds(0.2));
-                                    textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
-                                                 "если же хотите что-то изменить, то нажмите команду /abort_registration " +
-                                                 "и заполните заново 👹";
-                                    SendMessage(chat, textToSend);
-                                    break;
+                                        await Task.Delay(TimeSpan.FromSeconds(0.2));
+                                        textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
+                                                     "если же хотите что-то изменить, то нажмите команду /abort_registration " +
+                                                     "и заполните заново 👹";
+                                        SendMessage(chat, textToSend);
+                                        break;
+                                }
                             }
                         }
 
