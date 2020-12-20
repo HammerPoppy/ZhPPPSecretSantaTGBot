@@ -156,23 +156,23 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     case "/confirm_registration":
-                        Logger.Log($"User {from} asked for confirming registration");
+                        Logger.Log($"{from} asked for confirming registration");
 
                         if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
                             user.State == States.TargetSent)
                         {
                             Logger.Log("But he completed his registration already");
                             textToSend = "Вы уже завершили регистрацию. :)";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
                         }
                         else if (user.State == States.NewUser)
                         {
                             Logger.Log("But he didnt start registration");
                             textToSend = "Вы еще не начинали регистрацию";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
                         }
                         else if (user.State == States.RegistrationStarted)
@@ -185,8 +185,8 @@ namespace ZhPPPSecretSantaTGBot
                                              "или есть какие-то серьезные вопросы, то пишите сюда @bIudger. Для того " +
                                              "чтобы еще раз посмотреть памятку по датам отправьте команду /send_memo, " +
                                              "для того чтобы посмотреть свою анкету отправьте команду /send_my_profile";
-                                Logger.Log($"Sending to {from}");
-                                Logger.Log(textToSend);
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
 
                                 user.State = States.RegistrationCompleted;
@@ -197,8 +197,8 @@ namespace ZhPPPSecretSantaTGBot
                             {
                                 Logger.Log($"{from} has another than Ban Stage so cant complite his registration");
                                 textToSend = "Вы еще не закончили регистрацию, пожалуйста заполните анкету до конца.";
-                                Logger.Log($"Sending to {from}");
-                                Logger.Log(textToSend);
+                                // Logger.Log($"Sending to {from}");
+                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
 
                                 await Task.Delay(TimeSpan.FromSeconds(0.2));
