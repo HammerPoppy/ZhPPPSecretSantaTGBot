@@ -242,7 +242,7 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     case "/confirm_abort_registration":
-                        Logger.Log($"User {from} tried to confirm aborting registration");
+                        Logger.Log($"{from} tried to confirm aborting registration");
 
                         if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
                             user.State == States.TargetSent)
@@ -250,16 +250,16 @@ namespace ZhPPPSecretSantaTGBot
                             Logger.Log("But he completed his registration so profile cant be deleted");
                             textToSend = "Вы уже завершили регистрацию и не можете удалить свою анкету. " +
                                          "Если Вы все же хотите ее удалить, обращайтесь в наш аккаунт поддержки @bIudger";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
                         }
                         else if (user.State == States.NewUser)
                         {
                             Logger.Log("But he didnt start registration");
                             textToSend = "Вы еще не начинали регистрацию";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
                         }
                         else
@@ -282,10 +282,11 @@ namespace ZhPPPSecretSantaTGBot
                             user.Stage = Stages.None;
                             DBHandler.WriteCount();
 
+                            Logger.Log($"Successfully wiped {from} profile");
                             textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
                                          "Чтобы начать регистрацию отправьте команду /start_registration";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
 
                             await Task.Delay(TimeSpan.FromSeconds(0.2));
