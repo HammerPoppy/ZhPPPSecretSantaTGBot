@@ -535,11 +535,11 @@ namespace ZhPPPSecretSantaTGBot
             SendMessage(chat, textToSend);
         }
 
-        static void SendUserProfile(ChatId chat, User user, Telegram.Bot.Types.User @from)
+        private static void SendUserProfile(ChatId chat, User localUser, Telegram.Bot.Types.User user)
         {
             string textToSend = "";
             textToSend += "Статус анкеты: ";
-            switch (user.State)
+            switch (localUser.State)
             {
                 case States.RegistrationCompleted:
                     textToSend += "Регистрация завершена\n";
@@ -559,18 +559,17 @@ namespace ZhPPPSecretSantaTGBot
             }
 
             textToSend += "ФИО: ";
-            textToSend += user.OfficialName + "\n";
+            textToSend += localUser.OfficialName + "\n";
             textToSend += "Номер телефона: ";
-            textToSend += user.Phone + "\n";
+            textToSend += localUser.Phone + "\n";
             textToSend += "Город и номер отделения НП: ";
-            textToSend += user.Post + "\n";
+            textToSend += localUser.Post + "\n";
             textToSend += "Я фанат: ";
-            textToSend += user.FanOf + "\n";
+            textToSend += localUser.FanOf + "\n";
             textToSend += "Мне не стоит дарить: ";
-            textToSend += user.Ban + "\n";
+            textToSend += localUser.Ban + "\n";
 
-            Logger.Log($"Sending profile to {from}");
-            // Logger.Log("\n" + textToSend);
+            Logger.Log($"Sending profile to {user}");
             SendMessage(chat, textToSend);
         }
 
