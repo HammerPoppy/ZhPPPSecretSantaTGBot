@@ -18,7 +18,7 @@ namespace ZhPPPSecretSantaTGBot
         private static Logger Logger;
         private static DBHandler DBHandler;
 
-        private static readonly DateTime SecondStageDateTime = new DateTime(2020, 12, 21, 12, 21, 00);
+        private static readonly DateTime SecondStageDateTime = new DateTime(2020, 11, 21, 12, 21, 00);
         private static bool IsInSecondStage;
 
         private static void Main()
