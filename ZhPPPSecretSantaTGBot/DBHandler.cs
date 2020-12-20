@@ -23,7 +23,7 @@ namespace ZhPPPSecretSantaTGBot
 
         private bool AppClosing;
 
-        private User[] Users;
+        public User[] Users;
 
         public DBHandler(Logger logger)
         {

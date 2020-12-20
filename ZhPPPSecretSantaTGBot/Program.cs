@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -91,6 +91,17 @@ namespace ZhPPPSecretSantaTGBot
                         Console.WriteLine("help - list available commands\n" +
                                           "send registratiom end reminder - self explanatory\n" +
                                           "exit - end program");
+                        break;
+                    case "send registratiom end reminder":
+                        var users = DBHandler.Users;
+                        for (int i = 0; i < users.Length; i++)
+                        {
+                            if (users[i].State == States.NewUser || users[i].State == States.RegistrationStarted)
+                            {
+                                var difference = SecondStageDateTime - DateTime.Now;
+                                SendMessage(users[i].Id, $"Напоминаем, что конец регистрации уже через {(int)difference.TotalMinutes} минут");
+                            }
+                        }
                         break;
                     case "exit":
                         Logger.Log("Ending execution by user command");
