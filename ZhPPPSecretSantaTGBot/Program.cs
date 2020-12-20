@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -40,6 +41,15 @@ namespace ZhPPPSecretSantaTGBot
 
             var me = BotClient.GetMeAsync().Result;
             Logger.Log($"Connected successfully. Bot ID {me.Id}; named {me.FirstName}.");
+            
+            BotClient.SetMyCommandsAsync(new []
+            {
+                new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
+                new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
+            });
 
             BotClient.OnMessage += Bot_OnMessage;
             BotClient.StartReceiving();
