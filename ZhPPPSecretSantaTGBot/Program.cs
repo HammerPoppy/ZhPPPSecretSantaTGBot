@@ -578,6 +578,27 @@ namespace ZhPPPSecretSantaTGBot
             SendMessage(chat, textToSend);
         }
 
+        private static void SendTargetProfile(ChatId chat, User localUser, User targetUser,
+            Telegram.Bot.Types.User user)
+        {
+            string textToSend = "";
+
+            textToSend += "ФИО: ";
+            textToSend += targetUser.OfficialName + "\n";
+            textToSend += "Номер телефона: ";
+            textToSend += targetUser.Phone + "\n";
+            textToSend += "Город и номер отделения НП: ";
+            textToSend += targetUser.Post + "\n";
+            textToSend += "Я фанат: ";
+            textToSend += targetUser.FanOf + "\n";
+            textToSend += "Мне не стоит дарить: ";
+            textToSend += targetUser.Ban + "\n";
+
+            Logger.Log(
+                $"{user} Sending target (@{targetUser.Username ?? $"{targetUser.FirstName} {targetUser.LastName}"}) profile");
+            SendMessage(chat, textToSend);
+        }
+
         private static async void SendIntroMessages(ChatId chat, Telegram.Bot.Types.User user)
         {
             const double sendOffsetInSecs = 0.3;
