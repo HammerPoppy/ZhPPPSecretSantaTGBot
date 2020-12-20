@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -18,6 +18,9 @@ namespace ZhPPPSecretSantaTGBot
         private static ITelegramBotClient BotClient;
         private static Logger Logger;
         private static DBHandler DBHandler;
+
+        private static readonly DateTime SecondStageDateTime = new DateTime(2020, 12, 21, 12, 21, 00);
+        private static bool IsInSecondStage;
 
         static void Main()
         {
@@ -41,9 +44,16 @@ namespace ZhPPPSecretSantaTGBot
 
             var me = BotClient.GetMeAsync().Result;
             Logger.Log($"Connected successfully. Bot ID {me.Id}; named {me.FirstName}.");
-            
-            BotClient.SetMyCommandsAsync(new []
+
+            if (DateTime.Now > SecondStageDateTime)
             {
+                IsInSecondStage = true;
+                Logger.Log("Bot are in second stage");
+            }
+            else
+            {
+                Logger.Log("Bot are in first stage");
+            }
                 new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
                 new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
                 new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
