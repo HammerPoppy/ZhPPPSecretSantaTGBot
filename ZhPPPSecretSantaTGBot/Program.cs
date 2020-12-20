@@ -109,9 +109,6 @@ namespace ZhPPPSecretSantaTGBot
                         Logger.Log("Ending execution by user command");
                         BotClient.StopReceiving();
                         return;
-                    default:
-                        Console.WriteLine("Send help to list available commands");
-                        break;
                 }
             } while (true);
         }
