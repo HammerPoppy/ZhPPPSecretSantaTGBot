@@ -28,8 +28,8 @@ namespace ZhPPPSecretSantaTGBot
 
             if (File.Exists("config\\access token.txt"))
             {
-                StreamReader sr = new StreamReader("config\\access token.txt");
-                string accessToken = sr.ReadLine();
+                var sr = new StreamReader("config\\access token.txt");
+                var accessToken = sr.ReadLine();
                 BotClient = new TelegramBotClient(accessToken);
                 Logger.Log("Access token successfully acquired");
             }
