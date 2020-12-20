@@ -452,7 +452,7 @@ namespace ZhPPPSecretSantaTGBot
                     textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
                                  "если же хотите что-то изменить, то нажмите команду /abort_registration " +
                                  "и заполните заново 👹";
-                    Logger.Log($"Sending to {from}");
+                    // Logger.Log($"Sending to {from}");
                     // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
