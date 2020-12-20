@@ -302,8 +302,6 @@ namespace ZhPPPSecretSantaTGBot
                                 Logger.Log("But he had recieve target so his profile cant be deleted");
                                 textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
                                              "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else if (localUser.State == States.NewUser)
@@ -311,8 +309,6 @@ namespace ZhPPPSecretSantaTGBot
                                 Logger.Log("But he didnt start registration");
                                 textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
                                              "отправьте /start_registration";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else
@@ -320,8 +316,6 @@ namespace ZhPPPSecretSantaTGBot
                                 textToSend =
                                     "Вы хотите отменить регистрацию. Это очистит все поля в вашей анкете, вы уверены?\n" +
                                     "Для подтверждения отправьте команду /confirm_abort_registration";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                         }
@@ -345,8 +339,6 @@ namespace ZhPPPSecretSantaTGBot
                                 Logger.Log("But he had recieve target so his profile cant be deleted");
                                 textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
                                              "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else if (localUser.State == States.NewUser)
@@ -354,8 +346,6 @@ namespace ZhPPPSecretSantaTGBot
                                 Logger.Log("But he didnt start registration");
                                 textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
                                              "отправьте /start_registration";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
                             }
                             else
@@ -381,8 +371,6 @@ namespace ZhPPPSecretSantaTGBot
                                 Logger.Log($"Successfully wiped {user} profile");
                                 textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
                                              "Чтобы начать регистрацию отправьте команду /start_registration";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
                                 SendMessage(chat, textToSend);
 
                                 await Task.Delay(TimeSpan.FromSeconds(0.2));
