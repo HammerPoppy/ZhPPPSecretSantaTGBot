@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -83,14 +83,22 @@ namespace ZhPPPSecretSantaTGBot
 
             do
             {
-                Console.WriteLine("Send exit to quit");
+                Console.WriteLine("Send help to list available commands");
                 var command = Console.ReadLine();
                 switch (command)
                 {
+                    case "help":
+                        Console.WriteLine("help - list available commands\n" +
+                                          "send registratiom end reminder - self explanatory\n" +
+                                          "exit - end program");
+                        break;
                     case "exit":
                         Logger.Log("Ending execution by user command");
                         BotClient.StopReceiving();
                         return;
+                    default:
+                        Console.WriteLine("Send help to list available commands");
+                        break;
                 }
             } while (true);
         }
