@@ -122,15 +122,15 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     case "/start_registration":
-                        Logger.Log($"User {from} asked for starting registration");
+                        Logger.Log($"{from} asked for starting registration");
 
                         if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
                             user.State == States.TargetSent)
                         {
                             Logger.Log("But he completed his registration already");
                             textToSend = "Вы уже завершили регистрацию.";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
                         }
                         else if (user.State == States.RegistrationStarted)
@@ -138,8 +138,8 @@ namespace ZhPPPSecretSantaTGBot
                             Logger.Log("But he started his registration already");
                             textToSend = "Вы уже начали регистрацию. Чтобы отменить нынешнюю регистрацию " +
                                          "отправьте команду /abort_registration";
-                            Logger.Log($"Sending to {from}");
-                            Logger.Log(textToSend);
+                            // Logger.Log($"Sending to {from}");
+                            // Logger.Log(textToSend);
                             SendMessage(chat, textToSend);
                         }
                         else if (user.State == States.NewUser)
