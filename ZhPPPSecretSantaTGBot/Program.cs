@@ -80,7 +80,8 @@ namespace ZhPPPSecretSantaTGBot
                                     var difference = SecondStageDateTime - DateTime.Now;
                                     SendMessage(user.Id,
                                         $"Напоминаем, что конец регистрации уже через {(int) difference.TotalMinutes} минут");
-                                    Logger.Log($"{user.Username ?? $"{user.FirstName} {user.LastName}"}  Sent reminder");
+                                    Logger.Log(
+                                        $"{user.Username ?? $"{user.FirstName} {user.LastName}"}  Sent reminder");
                                 }
                             }
 
@@ -103,13 +104,20 @@ namespace ZhPPPSecretSantaTGBot
                             users = DBHandler.Users;
                             foreach (var user in users)
                             {
-                                if (user.State == States.TargetChosen)
+                                switch (user.State)
                                 {
-                                    SendMessage(user.Id,
-                                        "Эй йоу, мы наконец-то определили цель для тебя! " +
-                                        "Вот, держи его(ее) анкету и быстрее шуруй думать подарок. " +
-                                        "Всем удачи в этом нелегком деле!");
-                                    SendTargetProfile(user.Id, user, DBHandler.GetUserById(user.TargetId));
+                                    case States.TargetChosen:
+                                        SendMessage(user.Id,
+                                            "Эй йоу, мы наконец-то определили цель для тебя! " +
+                                            "Вот, держи его(ее) анкету и быстрее шуруй думать подарок. " +
+                                            "Всем удачи в этом нелегком деле!");
+                                        SendTargetProfile(user.Id, user, DBHandler.GetUserById(user.TargetId));
+                                        DBHandler.GetUserById(user.Id).State = States.TargetSent;
+                                        DBHandler.WriteCount();
+                                        break;
+                                    case States.TargetSent:
+                                        SendTargetProfile(user.Id, user, DBHandler.GetUserById(user.TargetId));
+                                        break;
                                 }
                             }
 
@@ -653,6 +661,8 @@ namespace ZhPPPSecretSantaTGBot
         {
             string textToSend = "";
 
+            textToSend += $"@{targetUser.Username ?? $"{targetUser.FirstName} {targetUser.LastName}"}\n";
+
             textToSend += "ФИО: ";
             textToSend += targetUser.OfficialName + "\n";
             textToSend += "Номер телефона: ";
@@ -667,7 +677,6 @@ namespace ZhPPPSecretSantaTGBot
             Logger.Log(
                 $"@{localUser.Username ?? $"{localUser.FirstName} {localUser.LastName}"} Sending target (@{targetUser.Username ?? $"{targetUser.FirstName} {targetUser.LastName}"}) profile");
             SendMessage(chat, textToSend);
-            localUser.State = States.TargetSent;
             DBHandler.WriteCount();
         }
 
