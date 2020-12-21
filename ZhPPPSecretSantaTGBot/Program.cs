@@ -44,39 +44,7 @@ namespace ZhPPPSecretSantaTGBot
             var me = BotClient.GetMeAsync().Result;
             Logger.Log($"Connected successfully. Bot ID {me.Id}; named {me.FirstName}.");
 
-            if (DateTime.Now > SecondStageDateTime)
-            {
-                IsInSecondStage = true;
-                Logger.Log("Bot are in second stage");
-            }
-            else
-            {
-                Logger.Log("Bot are in first stage");
-            }
-
-            if (IsInSecondStage)
-            {
-                Logger.Log("Setting second stage command set");
-                BotClient.SetMyCommandsAsync(new[]
-                {
-                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
-                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
-                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
-                    new BotCommand {Command = "send_target_profile ", Description = "посмотреть анкету цели"}
-                });
-            }
-            else
-            {
-                Logger.Log("Setting first stage command set");
-                BotClient.SetMyCommandsAsync(new[]
-                {
-                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
-                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
-                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
-                    new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
-                    new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
-                });
-            }
+            CheckBotStage();
 
             BotClient.OnMessage += Bot_OnMessage;
             BotClient.StartReceiving();
@@ -111,6 +79,45 @@ namespace ZhPPPSecretSantaTGBot
                         return;
                 }
             } while (true);
+        }
+
+        private static void CheckBotStage()
+        {
+            Logger.Log("Checking bot stage...");
+            if (DateTime.Now > SecondStageDateTime)
+            {
+                IsInSecondStage = true;
+                Logger.Log("Bot are in second stage");
+            }
+            else
+            {
+                IsInSecondStage = false;
+                Logger.Log("Bot are in first stage");
+            }
+
+            if (IsInSecondStage)
+            {
+                Logger.Log("Setting second stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "send_target_profile ", Description = "посмотреть анкету цели"}
+                });
+            }
+            else
+            {
+                Logger.Log("Setting first stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
+                    new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
+                });
+            }
         }
 
         static async void Bot_OnMessage(object sender, MessageEventArgs e)
