@@ -55,11 +55,14 @@ namespace ZhPPPSecretSantaTGBot
                 var command = Console.ReadLine();
                 switch (command)
                 {
+                    case "?":
                     case "help":
-                        Console.WriteLine("help - list available commands\n" +
-                                          "send registratiom end reminder - self explanatory\n" +
+                        Console.WriteLine("help (?) - list available commands\n" +
+                                          "send registratiom end reminder (srr) - self explanatory\n" +
+                                          "check stage (cs) - check is bot in second stage already + setting flag and appropriate command set\n" +
                                           "exit - end program");
                         break;
+                    case "srr":
                     case "send registratiom end reminder":
                         var users = DBHandler.Users;
                         foreach (var user in users)
@@ -73,51 +76,16 @@ namespace ZhPPPSecretSantaTGBot
                         }
 
                         break;
+                    case "cs":
+                    case "check stage":
+                        CheckBotStage();
+                        break;
                     case "exit":
                         Logger.Log("Ending execution by user command");
                         BotClient.StopReceiving();
                         return;
                 }
             } while (true);
-        }
-
-        private static void CheckBotStage()
-        {
-            Logger.Log("Checking bot stage...");
-            if (DateTime.Now > SecondStageDateTime)
-            {
-                IsInSecondStage = true;
-                Logger.Log("Bot are in second stage");
-            }
-            else
-            {
-                IsInSecondStage = false;
-                Logger.Log("Bot are in first stage");
-            }
-
-            if (IsInSecondStage)
-            {
-                Logger.Log("Setting second stage command set");
-                BotClient.SetMyCommandsAsync(new[]
-                {
-                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
-                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
-                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
-                    new BotCommand {Command = "send_target_profile ", Description = "посмотреть анкету цели"}
-                });
-            }
-            else
-            {
-                Logger.Log("Setting first stage command set");
-                BotClient.SetMyCommandsAsync(new[]
-                {
-                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
-                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
-                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
-                    new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
-                    new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
-                });
-            }
         }
 
         static async void Bot_OnMessage(object sender, MessageEventArgs e)
@@ -479,6 +447,45 @@ namespace ZhPPPSecretSantaTGBot
 
                         break;
                 }
+            }
+        }
+
+        private static void CheckBotStage()
+        {
+            Logger.Log("Checking bot stage...");
+            if (DateTime.Now > SecondStageDateTime)
+            {
+                IsInSecondStage = true;
+                Logger.Log("Bot are in second stage");
+            }
+            else
+            {
+                IsInSecondStage = false;
+                Logger.Log("Bot are in first stage");
+            }
+
+            if (IsInSecondStage)
+            {
+                Logger.Log("Setting second stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "send_target_profile ", Description = "посмотреть анкету цели"}
+                });
+            }
+            else
+            {
+                Logger.Log("Setting first stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
+                    new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
+                });
             }
         }
 
