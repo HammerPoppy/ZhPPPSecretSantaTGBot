@@ -80,7 +80,7 @@ namespace ZhPPPSecretSantaTGBot
                                     var difference = SecondStageDateTime - DateTime.Now;
                                     SendMessage(user.Id,
                                         $"Напоминаем, что конец регистрации уже через {(int) difference.TotalMinutes} минут");
-                                    Logger.Log($"{user} Sent reminder");
+                                    Logger.Log($"{user.Username ?? $"{user.FirstName} {user.LastName}"}  Sent reminder");
                                 }
                             }
 
