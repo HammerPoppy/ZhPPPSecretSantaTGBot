@@ -192,15 +192,24 @@ namespace ZhPPPSecretSantaTGBot
                         break;
 
                     case "/send_target_profile":
-                        if (localUser.State == States.TargetChosen || localUser.State == States.TargetSent)
+                        Logger.Log($"{user} asked for target profile");
+                        if (IsInSecondStage)
                         {
-                            SendTargetProfile(chat, localUser, DBHandler.GetUserById(localUser.TargetId));
+                            if (localUser.State == States.TargetChosen || localUser.State == States.TargetSent)
+                            {
+                                SendTargetProfile(chat, localUser, DBHandler.GetUserById(localUser.TargetId));
+                            }
+                            else
+                            {
+                                Logger.Log(
+                                    $"{user} asked for target profile but he has no target, sending info message");
+                                SendMessage(chat, "Извините, Вам не назначена цель, если Вам нужна помощь - " +
+                                                  "пишите в наш аккаунт поддержки @bIudger");
+                            }
                         }
                         else
                         {
-                            Logger.Log($"{user} asked for target profile but he has no target, sending info message");
-                            SendMessage(chat, "Извините, Вам не назначена цель, если Вам нужна помощь - " +
-                                              "пишите в наш аккаунт поддержки @bIudger");
+                            Logger.Log("But bot isnt in second stage, ignoring");
                         }
 
                         break;
