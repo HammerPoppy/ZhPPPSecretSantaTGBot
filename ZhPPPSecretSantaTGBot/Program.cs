@@ -12,21 +12,24 @@ using File = System.IO.File;
 
 namespace ZhPPPSecretSantaTGBot
 {
-    class Program
+    internal static class Program
     {
         private static ITelegramBotClient BotClient;
         private static Logger Logger;
         private static DBHandler DBHandler;
 
-        static void Main()
+        private static readonly DateTime SecondStageDateTime = new DateTime(2020, 12, 21, 12, 21, 00);
+        private static bool IsInSecondStage;
+
+        private static void Main()
         {
             Logger = new Logger();
             DBHandler = new DBHandler(Logger);
 
             if (File.Exists("config\\access token.txt"))
             {
-                StreamReader sr = new StreamReader("config\\access token.txt");
-                string accessToken = sr.ReadLine();
+                var sr = new StreamReader("config\\access token.txt");
+                var accessToken = sr.ReadLine();
                 BotClient = new TelegramBotClient(accessToken);
                 Logger.Log("Access token successfully acquired");
             }
@@ -41,15 +44,79 @@ namespace ZhPPPSecretSantaTGBot
             var me = BotClient.GetMeAsync().Result;
             Logger.Log($"Connected successfully. Bot ID {me.Id}; named {me.FirstName}.");
 
+            CheckBotStage();
+
             BotClient.OnMessage += Bot_OnMessage;
             BotClient.StartReceiving();
 
             do
             {
-                Console.WriteLine("Send exit to quit");
+                Console.WriteLine("Send help to list available commands");
                 var command = Console.ReadLine();
+                User[] users;
                 switch (command)
                 {
+                    case "?":
+                    case "help":
+                        Console.WriteLine("help (?) - list available commands\n" +
+                                          "send registratiom end reminder (srr) - self explanatory\n" +
+                                          "check stage (cs) - check is bot in second stage already + setting flag and appropriate command set\n" +
+                                          "send target profiles (stp) - send to all users their target profiles\n" +
+                                          "exit - end program");
+                        break;
+                    case "srr":
+                    case "send registratiom end reminder":
+                        Console.WriteLine("You want to send everyone REMINDERS. Send YES if you are sure:");
+                        command = Console.ReadLine();
+
+                        if (command == "YES")
+                        {
+                            Logger.Log("Sendings reminders to not registered users...");
+                            users = DBHandler.Users;
+                            foreach (var user in users)
+                            {
+                                if (user.State == States.NewUser || user.State == States.RegistrationStarted)
+                                {
+                                    var difference = SecondStageDateTime - DateTime.Now;
+                                    SendMessage(user.Id,
+                                        $"Напоминаем, что конец регистрации уже через {(int) difference.TotalMinutes} минут");
+                                    Logger.Log($"{user} Sent reminder");
+                                }
+                            }
+
+                            Logger.Log("Done");
+                        }
+
+                        break;
+                    case "cs":
+                    case "check stage":
+                        CheckBotStage();
+                        break;
+                    case "stp":
+                    case "send target profiles":
+                        Console.WriteLine("You want to send everyone their TARGET PROFILES. Send YES if you are sure:");
+                        command = Console.ReadLine();
+
+                        if (command == "YES")
+                        {
+                            Logger.Log("Sendings target profiles to users...");
+                            users = DBHandler.Users;
+                            foreach (var user in users)
+                            {
+                                if (user.State == States.TargetChosen)
+                                {
+                                    SendMessage(user.Id,
+                                        "Эй йоу, мы наконец-то определили цель для тебя! " +
+                                        "Вот, держи его(ее) анкету и быстрее шуруй думать подарок. " +
+                                        "Всем удачи в этом нелегком деле!");
+                                    SendTargetProfile(user.Id, user, DBHandler.GetUserById(user.TargetId));
+                                }
+                            }
+
+                            Logger.Log("Done");
+                        }
+
+                        break;
                     case "exit":
                         Logger.Log("Ending execution by user command");
                         BotClient.StopReceiving();
@@ -62,11 +129,11 @@ namespace ZhPPPSecretSantaTGBot
         {
             if (e.Message.Text != null)
             {
-                var from = e.Message.From;
+                var user = e.Message.From;
                 var chat = e.Message.Chat;
-                User user;
+                User localUser;
                 Logger.Log(
-                    $"Received a text message in chat {e.Message.Chat.Id}|@{from.Username}|{from.FirstName} {from.LastName}");
+                    $"{user} sent a text message");
                 Logger.Log(e.Message.Text);
 
                 if (chat.Id == 484323184)
@@ -76,228 +143,262 @@ namespace ZhPPPSecretSantaTGBot
                 }
 
                 // TODO detect non text
-                if (DBHandler.ContainsUser(from.Id))
+                if (DBHandler.ContainsUser(user.Id))
                 {
-                    user = DBHandler.GetUserById(from.Id);
+                    localUser = DBHandler.GetUserById(user.Id);
                 }
                 else
                 {
-                    user = new User(from.Id, from.Username, from.FirstName, from.LastName);
-                    user = DBHandler.AddNewUser(user);
-                    Logger.Log($"Created new user {from.Username}");
+                    localUser = new User(user.Id, user.Username, user.FirstName, user.LastName);
+                    localUser = DBHandler.AddNewUser(localUser);
+                    Logger.Log($"Created new user {user.Username}");
                 }
-
-                // TODO from to chat migration
 
                 string textToSend;
                 switch (e.Message.Text)
                 {
                     case "/start":
-                        SendIntroMessages(chat, from);
+                        SendIntroMessages(chat, user);
 
                         await Task.Delay(TimeSpan.FromSeconds(4));
 
-                        SendMemo(chat, from);
+                        SendMemo(chat, user);
 
-                        if (user.State == States.NewUser)
+                        if (IsInSecondStage)
                         {
-                            textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            textToSend = "К сожалению регистрация уже закрыта";
                             SendMessage(chat, textToSend);
                         }
-                        else if (user.State == States.RegistrationStarted)
-                        {
-                            AskProfileQuestion(chat, from, user);
-                        }
+                        else
+                            switch (localUser.State)
+                            {
+                                case States.NewUser:
+                                    textToSend = "Чтобы начать регистрацию отправьте команду /start_registration";
+                                    SendMessage(chat, textToSend);
+                                    break;
+                                case States.RegistrationStarted:
+                                    AskProfileQuestion(chat, user, localUser);
+                                    break;
+                            }
 
                         break;
 
                     case "/send_memo":
-                        SendMemo(chat, from);
+                        SendMemo(chat, user);
                         break;
 
                     case "/send_my_profile":
-                        SendUserProfile(chat, user, from);
+                        SendUserProfile(chat, localUser, user);
+                        break;
+
+                    case "/send_target_profile":
+                        if (localUser.State == States.TargetChosen || localUser.State == States.TargetSent)
+                        {
+                            SendTargetProfile(chat, localUser, DBHandler.GetUserById(localUser.TargetId));
+                        }
+                        else
+                        {
+                            Logger.Log($"{user} asked for target profile but he has no target, sending info message");
+                            SendMessage(chat, "Извините, Вам не назначена цель, если Вам нужна помощь - " +
+                                              "пишите в наш аккаунт поддержки @bIudger");
+                        }
+
                         break;
 
                     case "/start_registration":
-                        Logger.Log($"{from} asked for starting registration");
+                        Logger.Log($"{user} asked for starting registration");
 
-                        if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
-                            user.State == States.TargetSent)
+                        if (IsInSecondStage)
                         {
-                            Logger.Log("But he completed his registration already");
-                            textToSend = "Вы уже завершили регистрацию, если вы хотите начать регистрацию заново, " +
-                                         "то сначала отмените прежнюю отправив команду /abort_registration ";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            Logger.Log($"{user} But bot is in second stage, sending refuse message");
+                            textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
-                        else if (user.State == States.RegistrationStarted)
+                        else
                         {
-                            Logger.Log("But he started his registration already");
-                            textToSend = "Вы уже начали регистрацию. Чтобы отменить нынешнюю регистрацию " +
-                                         "отправьте команду /abort_registration, либо же /confirm_registration " +
-                                         "чтобы завершить нынешнюю";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (user.State == States.NewUser)
-                        {
-                            Logger.Log("He has state NewUser. Starting registration");
-                            user.State = States.RegistrationStarted;
-                            user.Stage = Stages.None;
-                            DBHandler.WriteCount();
+                            if (localUser.State == States.RegistrationCompleted ||
+                                localUser.State == States.TargetChosen ||
+                                localUser.State == States.TargetSent)
+                            {
+                                Logger.Log($"{user} But he completed his registration already");
+                                textToSend =
+                                    "Вы уже завершили регистрацию, если вы хотите начать регистрацию заново, " +
+                                    "то сначала отмените прежнюю отправив команду /abort_registration ";
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.RegistrationStarted)
+                            {
+                                Logger.Log($"{user} But he started his registration already");
+                                textToSend = "Вы уже начали регистрацию. Чтобы отменить нынешнюю регистрацию " +
+                                             "отправьте команду /abort_registration, либо же /confirm_registration " +
+                                             "чтобы завершить нынешнюю";
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.NewUser)
+                            {
+                                Logger.Log($"{user} has state NewUser. Starting registration");
+                                localUser.State = States.RegistrationStarted;
+                                localUser.Stage = Stages.None;
+                                DBHandler.WriteCount();
 
-                            Logger.Log("Asking user a question");
-                            AskProfileQuestion(chat, from, user);
+                                Logger.Log($"{user}Asking a question");
+                                AskProfileQuestion(chat, user, localUser);
+                            }
                         }
 
                         break;
 
                     case "/confirm_registration":
-                        Logger.Log($"{from} asked for confirming registration");
+                        Logger.Log($"{user} asked for confirming registration");
 
-                        if (user.State == States.RegistrationCompleted || user.State == States.TargetChosen ||
-                            user.State == States.TargetSent)
+                        if (IsInSecondStage)
                         {
-                            Logger.Log("But he completed his registration already");
-                            textToSend = "Вы уже завершили регистрацию. :)";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            Logger.Log($"But bot is in second stage, sending refuse message");
+                            textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
-                        else if (user.State == States.NewUser)
+                        else
                         {
-                            Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
-                                         "отправьте /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (user.State == States.RegistrationStarted)
-                        {
-                            if (user.Stage == Stages.StageBan)
+                            if (localUser.State == States.RegistrationCompleted ||
+                                localUser.State == States.TargetChosen ||
+                                localUser.State == States.TargetSent)
                             {
-                                Logger.Log($"{from} has Stage Ban so compliting his registration");
-                                textToSend = "Поздравляем, Вы успешно всё заполнили и теперь остается только ждать, " +
-                                             "когда бот пришлет анкету Вашей жертвы. Если Вам нужна будет помощь " +
-                                             "или есть какие-то серьезные вопросы, то пишите сюда @bIudger. Для того " +
-                                             "чтобы еще раз посмотреть памятку по датам отправьте команду /send_memo, " +
-                                             "для того чтобы посмотреть свою анкету отправьте команду " +
-                                             "/send_my_profile, чтобы изменить что-то в анкете отправьте " +
-                                             "/abort_registration и заполните ее заново 👹";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
+                                Logger.Log("But he completed his registration already");
+                                textToSend = "Вы уже завершили регистрацию. :)";
                                 SendMessage(chat, textToSend);
-
-                                user.State = States.RegistrationCompleted;
-                                DBHandler.WriteCount();
-                                Logger.Log($"Set {from} State to RegistrationCompleted");
                             }
-                            else
+                            else if (localUser.State == States.NewUser)
                             {
-                                Logger.Log($"{from} has another than Ban Stage so cant complite his registration");
-                                textToSend = "Вы еще не закончили регистрацию, пожалуйста заполните анкету до конца.";
-                                // Logger.Log($"Sending to {from}");
-                                // Logger.Log(textToSend);
+                                Logger.Log("But he didnt start registration");
+                                textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                             "отправьте /start_registration";
                                 SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.RegistrationStarted)
+                            {
+                                if (localUser.Stage == Stages.StageBan)
+                                {
+                                    Logger.Log($"{user} has Stage Ban so compliting his registration");
+                                    textToSend =
+                                        "Поздравляем, Вы успешно всё заполнили и теперь остается только ждать, " +
+                                        "когда бот пришлет анкету Вашей жертвы. Если Вам нужна будет помощь " +
+                                        "или есть какие-то серьезные вопросы, то пишите сюда @bIudger. Для того " +
+                                        "чтобы еще раз посмотреть памятку по датам отправьте команду /send_memo, " +
+                                        "для того чтобы посмотреть свою анкету отправьте команду " +
+                                        "/send_my_profile, чтобы изменить что-то в анкете отправьте " +
+                                        "/abort_registration и заполните ее заново 👹";
+                                    SendMessage(chat, textToSend);
 
-                                await Task.Delay(TimeSpan.FromSeconds(0.2));
-                                AskProfileQuestion(chat, from, user);
+                                    localUser.State = States.RegistrationCompleted;
+                                    DBHandler.WriteCount();
+                                    Logger.Log($"{user} Set State to RegistrationCompleted");
+                                }
+                                else
+                                {
+                                    Logger.Log($"{user} has another than Ban Stage so cant complite his registration");
+                                    textToSend =
+                                        "Вы еще не закончили регистрацию, пожалуйста заполните анкету до конца.";
+                                    SendMessage(chat, textToSend);
+
+                                    await Task.Delay(TimeSpan.FromSeconds(0.2));
+                                    AskProfileQuestion(chat, user, localUser);
+                                }
                             }
                         }
 
                         break;
 
                     case "/abort_registration":
-                        Logger.Log($"{from} asked for aborting registration");
+                        Logger.Log($"{user} asked for aborting registration");
 
-                        if (user.State == States.TargetChosen ||
-                            user.State == States.TargetSent)
+                        if (IsInSecondStage)
                         {
-                            Logger.Log("But he had recieve target so his profile cant be deleted");
-                            textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
-                                         "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (user.State == States.NewUser)
-                        {
-                            Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
-                                         "отправьте /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            Logger.Log($"But bot is in second stage, sending refuse message");
+                            textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
                         else
                         {
-                            textToSend =
-                                "Вы хотите отменить регистрацию. Это очистит все поля в вашей анкете, вы уверены?\n" +
-                                "Для подтверждения отправьте команду /confirm_abort_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
+                            if (localUser.State == States.TargetChosen ||
+                                localUser.State == States.TargetSent)
+                            {
+                                Logger.Log("But he had recieve target so his profile cant be deleted");
+                                textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
+                                             "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.NewUser)
+                            {
+                                Logger.Log("But he didnt start registration");
+                                textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                             "отправьте /start_registration";
+                                SendMessage(chat, textToSend);
+                            }
+                            else
+                            {
+                                textToSend =
+                                    "Вы хотите отменить регистрацию. Это очистит все поля в вашей анкете, вы уверены?\n" +
+                                    "Для подтверждения отправьте команду /confirm_abort_registration";
+                                SendMessage(chat, textToSend);
+                            }
                         }
 
                         break;
 
                     case "/confirm_abort_registration":
-                        Logger.Log($"{from} tried to confirm aborting registration");
+                        Logger.Log($"{user} tried to confirm aborting registration");
 
-                        if (user.State == States.TargetChosen ||
-                            user.State == States.TargetSent)
+                        if (IsInSecondStage)
                         {
-                            Logger.Log("But he had recieve target so his profile cant be deleted");
-                            textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
-                                         "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
-                        }
-                        else if (user.State == States.NewUser)
-                        {
-                            Logger.Log("But he didnt start registration");
-                            textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
-                                         "отправьте /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
+                            Logger.Log($"But bot is in second stage, sending refuse message");
+                            textToSend = "Извините, регистрация уже закончилась";
                             SendMessage(chat, textToSend);
                         }
                         else
                         {
-                            Logger.Log("Wiping user answers...");
-                            user.OfficialName = null;
-                            Logger.Log("--OfficialName");
-                            user.Phone = null;
-                            Logger.Log("--Phone");
-                            user.Post = null;
-                            Logger.Log("--Post");
-                            user.FanOf = null;
-                            Logger.Log("--FanOf");
-                            user.Ban = null;
-                            Logger.Log("--Ban");
-                            Logger.Log("Done");
-                            DBHandler.WriteCount();
+                            if (localUser.State == States.TargetChosen ||
+                                localUser.State == States.TargetSent)
+                            {
+                                Logger.Log("But he had recieve target so his profile cant be deleted");
+                                textToSend = "Вы уже получили анкету цели и не можете удалить свою анкету. " +
+                                             "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
+                                SendMessage(chat, textToSend);
+                            }
+                            else if (localUser.State == States.NewUser)
+                            {
+                                Logger.Log("But he didnt start registration");
+                                textToSend = "Вы еще не начинали регистрацию, чтобы начать регистрацию " +
+                                             "отправьте /start_registration";
+                                SendMessage(chat, textToSend);
+                            }
+                            else
+                            {
+                                Logger.Log("Wiping user answers...");
+                                localUser.OfficialName = null;
+                                Logger.Log("--OfficialName");
+                                localUser.Phone = null;
+                                Logger.Log("--Phone");
+                                localUser.Post = null;
+                                Logger.Log("--Post");
+                                localUser.FanOf = null;
+                                Logger.Log("--FanOf");
+                                localUser.Ban = null;
+                                Logger.Log("--Ban");
+                                Logger.Log("Done");
+                                DBHandler.WriteCount();
 
-                            user.State = States.NewUser;
-                            user.Stage = Stages.None;
-                            DBHandler.WriteCount();
+                                localUser.State = States.NewUser;
+                                localUser.Stage = Stages.None;
+                                DBHandler.WriteCount();
 
-                            Logger.Log($"Successfully wiped {from} profile");
-                            textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
-                                         "Чтобы начать регистрацию отправьте команду /start_registration";
-                            // Logger.Log($"Sending to {from}");
-                            // Logger.Log(textToSend);
-                            SendMessage(chat, textToSend);
+                                Logger.Log($"{user} Successfully wiped profile");
+                                textToSend = "Ваша анкета очищена и статус регистрации сброшен. " +
+                                             "Чтобы начать регистрацию отправьте команду /start_registration";
+                                SendMessage(chat, textToSend);
 
-                            await Task.Delay(TimeSpan.FromSeconds(0.2));
-                            SendUserProfile(chat, user, from);
+                                await Task.Delay(TimeSpan.FromSeconds(0.2));
+                                SendUserProfile(chat, localUser, user);
+                            }
                         }
 
                         break;
@@ -305,77 +406,79 @@ namespace ZhPPPSecretSantaTGBot
                     // TODO non-in-registration response
 
                     default:
-                        Logger.Log($"{from} sent {e.Message.Text}");
-                        if (user.State == States.RegistrationStarted)
+                        if (localUser.State == States.RegistrationStarted)
                         {
-                            Logger.Log("He is in State RegistrationStarted");
-                            switch (user.Stage)
+                            Logger.Log($"{user} is in State RegistrationStarted");
+                            if (IsInSecondStage)
                             {
-                                case Stages.None:
-                                    Logger.Log($"{from} is on None stage, saving his answer to Name");
-                                    user.OfficialName = e.Message.Text;
-                                    Logger.Log($"{from} setting Stage to Name");
-                                    user.Stage = Stages.StageOffName;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, from, user);
-                                    break;
+                                Logger.Log($"{user} But bot is in second stage, ignoring");
+                            }
+                            else
+                            {
+                                switch (localUser.Stage)
+                                {
+                                    case Stages.None:
+                                        Logger.Log($"{user} is on None stage, saving his answer to Name");
+                                        localUser.OfficialName = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Name");
+                                        localUser.Stage = Stages.StageOffName;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StageOffName:
-                                    Logger.Log($"{from} is on Name stage, saving his answer to Phone");
-                                    user.Phone = e.Message.Text;
-                                    Logger.Log($"{from} setting Stage to Phone");
-                                    user.Stage = Stages.StagePhone;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, from, user);
-                                    break;
+                                    case Stages.StageOffName:
+                                        Logger.Log($"{user} is on Name stage, saving his answer to Phone");
+                                        localUser.Phone = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Phone");
+                                        localUser.Stage = Stages.StagePhone;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StagePhone:
-                                    Logger.Log($"{from} is on Phone stage, saving his answer to Post");
-                                    user.Post = e.Message.Text;
-                                    Logger.Log($"{from} setting Stage to Post");
-                                    user.Stage = Stages.StagePost;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, from, user);
-                                    break;
+                                    case Stages.StagePhone:
+                                        Logger.Log($"{user} is on Phone stage, saving his answer to Post");
+                                        localUser.Post = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Post");
+                                        localUser.Stage = Stages.StagePost;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StagePost:
-                                    Logger.Log($"{from} is on Post stage, saving his answer to Fan");
-                                    user.FanOf = e.Message.Text;
-                                    Logger.Log($"{from} setting Stage to Fan");
-                                    user.Stage = Stages.StageFan;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, from, user);
-                                    break;
+                                    case Stages.StagePost:
+                                        Logger.Log($"{user} is on Post stage, saving his answer to Fan");
+                                        localUser.FanOf = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Fan");
+                                        localUser.Stage = Stages.StageFan;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StageFan:
-                                    Logger.Log($"{from} is on Fan stage, saving his answer to Ban");
-                                    user.Ban = e.Message.Text;
-                                    Logger.Log($"{from} setting Stage to Ban");
-                                    user.Stage = Stages.StageBan;
-                                    DBHandler.WriteCount();
-                                    AskProfileQuestion(chat, from, user);
-                                    break;
+                                    case Stages.StageFan:
+                                        Logger.Log($"{user} is on Fan stage, saving his answer to Ban");
+                                        localUser.Ban = e.Message.Text;
+                                        Logger.Log($"{user} setting Stage to Ban");
+                                        localUser.Stage = Stages.StageBan;
+                                        DBHandler.WriteCount();
+                                        AskProfileQuestion(chat, user, localUser);
+                                        break;
 
-                                case Stages.StageBan:
-                                    Logger.Log(
-                                        $"{from} is on Ban stage, sending him info about registration confirmation");
-                                    textToSend = "Проверьте Вашу анкету еще раз потому, что после подтверждения " +
-                                                 "изменить ответы через бот невозможно:";
-                                    // Logger.Log($"Sending to {from}");
-                                    // Logger.Log(textToSend);
-                                    SendMessage(chat, textToSend);
+                                    case Stages.StageBan:
+                                        Logger.Log(
+                                            $"{user} is on Ban stage, sending him info about registration confirmation");
+                                        textToSend = "Проверьте Вашу анкету еще раз потому, что после подтверждения " +
+                                                     "изменить ответы через бот невозможно:";
+                                        SendMessage(chat, textToSend);
 
-                                    await Task.Delay(TimeSpan.FromSeconds(0.2));
-                                    SendUserProfile(chat, user, from);
+                                        await Task.Delay(TimeSpan.FromSeconds(0.2));
+                                        SendUserProfile(chat, localUser, user);
 
-                                    await Task.Delay(TimeSpan.FromSeconds(0.2));
-                                    textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
-                                                 "если же хотите что-то изменить, то нажмите команду /abort_registration " +
-                                                 "и заполните заново 👹";
-                                    // Logger.Log($"Sending to {from}");
-                                    // Logger.Log(textToSend);
-                                    SendMessage(chat, textToSend);
-                                    break;
+                                        await Task.Delay(TimeSpan.FromSeconds(0.2));
+                                        textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
+                                                     "если же хотите что-то изменить, то нажмите команду /abort_registration " +
+                                                     "и заполните заново 👹";
+                                        SendMessage(chat, textToSend);
+                                        break;
+                                }
                             }
                         }
 
@@ -384,104 +487,126 @@ namespace ZhPPPSecretSantaTGBot
             }
         }
 
+        private static void CheckBotStage()
+        {
+            Logger.Log("Checking bot stage...");
+            if (DateTime.Now > SecondStageDateTime)
+            {
+                IsInSecondStage = true;
+                Logger.Log("Bot are in second stage");
+            }
+            else
+            {
+                IsInSecondStage = false;
+                Logger.Log("Bot are in first stage");
+            }
+
+            if (IsInSecondStage)
+            {
+                Logger.Log("Setting second stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "send_target_profile ", Description = "посмотреть анкету цели"}
+                });
+            }
+            else
+            {
+                Logger.Log("Setting first stage command set");
+                BotClient.SetMyCommandsAsync(new[]
+                {
+                    new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
+                    new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
+                    new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
+                    new BotCommand {Command = "start_registration", Description = "начать регистрацию"},
+                    new BotCommand {Command = "abort_registration", Description = "отменить регистрацию"}
+                });
+            }
+        }
+
         // TODO send memo on deleting confirmation
 
-        private static async void AskProfileQuestion(Chat chat, Telegram.Bot.Types.User from, User user)
+        private static async void AskProfileQuestion(Chat chat, Telegram.Bot.Types.User user, User localUser)
         {
             string textToSend;
-            Logger.Log($"Asking {from} next question");
-            switch (user.Stage)
+            Logger.Log($"{user} Asking next question");
+            switch (localUser.Stage)
             {
                 case Stages.None:
-                    Logger.Log($"{from} is on None stage, asking Name question");
+                    Logger.Log($"{user} is on None stage, asking Name question");
                     textToSend = "ФИО (полное, на рідній или русском)";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StageOffName:
-                    Logger.Log($"{from} is on Name stage, asking Phone question");
+                    Logger.Log($"{user} is on Name stage, asking Phone question");
                     textToSend = "Номер телефона (необходим для отправки посылки)";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StagePhone:
-                    Logger.Log($"{from} is on Phone stage, asking Post question");
+                    Logger.Log($"{user} is on Phone stage, asking Post question");
                     textToSend = "Город и номер отделения НП (или подробно описать другой метод доставки)";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StagePost:
-                    Logger.Log($"{from} is on Post stage, asking Fan question");
+                    Logger.Log($"{user} is on Post stage, asking Fan question");
                     textToSend = "Теперь пара вопросов для того чтобы можно было получше выбрать Вам подарок";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
 
                     await Task.Delay(TimeSpan.FromSeconds(0.2));
                     textToSend = "Опишите фанатом чего вы являетесь (например Гарри Поттер, Initial D, " +
                                  "Гречка (ну та которая музыку поет), Райан Гослинг)";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StageFan:
-                    Logger.Log($"{from} is on Fan stage, asking Ban question");
+                    Logger.Log($"{user} is on Fan stage, asking Ban question");
                     textToSend = "А теперь укажите что Вам лучше не дарить " +
                                  "<i>(конечно можете пропустить этот пункт (тогда напишите что-то типа " +
                                  "\"Все равно...\"), но любой Ваш отзыв обязательно обработают и учтут наши " +
                                  "сотрудники отдела качества)</i>";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
 
                 case Stages.StageBan:
-                    Logger.Log($"{from} is on Ban stage, asking registration confirmation");
+                    Logger.Log($"{user} is on Ban stage, asking registration confirmation");
                     textToSend = "Отлично, это были все вопросы на которые необходимо было ответить! " +
                                  "Теперь проверьте Вашу анкету еще раз потому, что после подтверждения " +
                                  "изменить ответы через бот невозможно:";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
 
                     await Task.Delay(TimeSpan.FromSeconds(0.2));
-                    SendUserProfile(chat, user, from);
+                    SendUserProfile(chat, localUser, user);
 
                     await Task.Delay(TimeSpan.FromSeconds(0.2));
                     textToSend = "Если все хорошо, то нажмите команду /confirm_registration " +
                                  "если же хотите что-то изменить, то нажмите команду /abort_registration " +
                                  "и заполните заново 👹";
-                    // Logger.Log($"Sending to {from}");
-                    // Logger.Log(textToSend);
                     SendMessage(chat, textToSend);
                     break;
             }
         }
 
-        static void SendMemo(ChatId chat, Telegram.Bot.Types.User @from)
+        private static void SendMemo(ChatId chat, Telegram.Bot.Types.User user)
         {
-            string textToSend = "21.12 12:21 - закрытие регистрации\n" +
-                                "22-е - получение анкет\n" +
-                                "26-о вечером - отправка подарков\n" +
-                                "27-о вечером (ориентировочно) - получение подарков";
+            const string textToSend = "21.12 12:21 - закрытие регистрации\n" +
+                                      "22-е - получение анкет\n" +
+                                      "26-о вечером - отправка подарков\n" +
+                                      "27-о вечером (ориентировочно) - получение подарков";
 
-            Logger.Log($"Sending memo to {from}");
-            // Logger.Log("\n" + textToSend);
+            Logger.Log($"{user} Sending memo");
             SendMessage(chat, textToSend);
         }
 
-        static void SendUserProfile(ChatId chat, User user, Telegram.Bot.Types.User @from)
+        private static void SendUserProfile(ChatId chat, User localUser, Telegram.Bot.Types.User user)
         {
             string textToSend = "";
             textToSend += "Статус анкеты: ";
-            switch (user.State)
+            switch (localUser.State)
             {
                 case States.RegistrationCompleted:
                     textToSend += "Регистрация завершена\n";
@@ -501,28 +626,48 @@ namespace ZhPPPSecretSantaTGBot
             }
 
             textToSend += "ФИО: ";
-            textToSend += user.OfficialName + "\n";
+            textToSend += localUser.OfficialName + "\n";
             textToSend += "Номер телефона: ";
-            textToSend += user.Phone + "\n";
+            textToSend += localUser.Phone + "\n";
             textToSend += "Город и номер отделения НП: ";
-            textToSend += user.Post + "\n";
+            textToSend += localUser.Post + "\n";
             textToSend += "Я фанат: ";
-            textToSend += user.FanOf + "\n";
+            textToSend += localUser.FanOf + "\n";
             textToSend += "Мне не стоит дарить: ";
-            textToSend += user.Ban + "\n";
+            textToSend += localUser.Ban + "\n";
 
-            Logger.Log($"Sending profile to {from}");
-            // Logger.Log("\n" + textToSend);
+            Logger.Log($"{user} Sending profile");
             SendMessage(chat, textToSend);
         }
 
-        static async void SendIntroMessages(ChatId chat, Telegram.Bot.Types.User @from)
+        private static void SendTargetProfile(ChatId chat, User localUser, User targetUser)
         {
-            double sendOffsetInSecs = 0.3;
-            Logger.Log($"Sending intro messages to {from}");
+            string textToSend = "";
 
-            string textToSend = "Приветствуем Вас в боте Секретного Санты ЖППП!";
-            // Logger.Log(textToSend);
+            textToSend += "ФИО: ";
+            textToSend += targetUser.OfficialName + "\n";
+            textToSend += "Номер телефона: ";
+            textToSend += targetUser.Phone + "\n";
+            textToSend += "Город и номер отделения НП: ";
+            textToSend += targetUser.Post + "\n";
+            textToSend += "Я фанат: ";
+            textToSend += targetUser.FanOf + "\n";
+            textToSend += "Мне не стоит дарить: ";
+            textToSend += targetUser.Ban + "\n";
+
+            Logger.Log(
+                $"@{localUser.Username ?? $"{localUser.FirstName} {localUser.LastName}"} Sending target (@{targetUser.Username ?? $"{targetUser.FirstName} {targetUser.LastName}"}) profile");
+            SendMessage(chat, textToSend);
+            localUser.State = States.TargetSent;
+            DBHandler.WriteCount();
+        }
+
+        private static async void SendIntroMessages(ChatId chat, Telegram.Bot.Types.User user)
+        {
+            const double sendOffsetInSecs = 0.3;
+            Logger.Log($"{user} Sending intro messages");
+
+            var textToSend = "Приветствуем Вас в боте Секретного Санты ЖППП!";
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -530,7 +675,6 @@ namespace ZhPPPSecretSantaTGBot
                 "С помощью этого бота вы можете зарегистрироваться для участия, а также узнать всю подробную инфу" +
                 " касательно Секретного Санты 2020 by Zhopki Popki©! <i>главный админ убьет меня за такое название ну не" +
                 " важно давайте начинать уже там целая простынь текста дальше...</i>";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -538,7 +682,6 @@ namespace ZhPPPSecretSantaTGBot
                 "Поскольку этот год оч прикольный такой и интересный в некоторых моментах, мы в редакции Желтой" +
                 " Прессы решили, что разумнее всего будет провести данный ивент с некоторыми поправками, касающимися" +
                 " доставки подарков. И ДА - подарки будут отправляться по почте :(";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -546,14 +689,12 @@ namespace ZhPPPSecretSantaTGBot
                          " распаковывает, тщательно Вами запакованную в матрешку из коробок и туалетной бумаги флешку," +
                          " но на этот счет мы попробуем кое-что предпринять; а во-вторых это то, что человек," +
                          " принимающий подарок, сможет узнать от кого получил подарок (из-за накладной).";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "<i>(Кто-то по секрету сказал что можно попробовать на почте при отправке указать не Ваши" +
                          " а абсолютно рандомные данные и таким образом остаться анонимным, однако этот вариант" +
                          " стоит рассматривать только для энтузиастов и вообще обязательным не является)</i>";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -564,7 +705,6 @@ namespace ZhPPPSecretSantaTGBot
                          "Инфа о почтовом отделении\n" +
                          "А также некоторая информация для человека который будет дарить, дабы ни у кого " +
                          "не было проблем с выбором подарка";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -572,7 +712,6 @@ namespace ZhPPPSecretSantaTGBot
                          " всех ППшничков которые должны в этом участвовать чтобы никто не пропустил), и 22-о" +
                          " днем Вам придет анкета того кому Вы будете дарить подарок. Далее Вы готовите подарок " +
                          "и отправляете его 26-о числа (по-возможности так чтоб посылка пришла получателю 27-о числа).";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -581,7 +720,6 @@ namespace ZhPPPSecretSantaTGBot
                          "кидаете их сюда в бот, в чатик Прикладного питания или делитесь ими со всеми каким либо " +
                          "другим образом. Так каждый сможет понаблюдать за получателем подарка и все разделят " +
                          "радость праздника с другими.";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -590,7 +728,6 @@ namespace ZhPPPSecretSantaTGBot
                          "поводу стоимости подарка это 150-250грн, а также не забывайте что около 50грн пойдет на " +
                          "отправку посылки. К тому же это стоит учитывать при упаковке подарка, например всякие " +
                          "банты на коробках по любому помнут на почте если не предпринять какие-то меры 😭. <i>Банты топ.</i>";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
@@ -600,21 +737,19 @@ namespace ZhPPPSecretSantaTGBot
                          "свои функции в каком-то другом плане. В таком случае пишите на аккаунт нашей поддержки" +
                          " - @bIudger, и мы постараемся помочь Вам в ближайшее время. " +
                          "Иии да, можете уже заполнять анкету, удачи Вам с подготовкой подарка и счастливых праздников 🥳!";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
             await Task.Delay(TimeSpan.FromSeconds(sendOffsetInSecs));
 
             textToSend = "С любовью, редакция @ppidory <i>(ахвахвхахв у нас внатуре тэг канала - ПИПИДОРЫ)</i>";
-            // Logger.Log(textToSend);
             SendMessage(chat, textToSend);
         }
 
-        static async void SendMessage(ChatId to, string message)
+        private static async void SendMessage(ChatId chat, string message)
         {
             try
             {
                 await BotClient.SendTextMessageAsync(
-                    chatId: to,
+                    chatId: chat,
                     text: message,
                     parseMode: ParseMode.Html
                 );
