@@ -53,6 +53,7 @@ namespace ZhPPPSecretSantaTGBot
             {
                 Console.WriteLine("Send help to list available commands");
                 var command = Console.ReadLine();
+                User[] users;
                 switch (command)
                 {
                     case "?":
@@ -60,25 +61,61 @@ namespace ZhPPPSecretSantaTGBot
                         Console.WriteLine("help (?) - list available commands\n" +
                                           "send registratiom end reminder (srr) - self explanatory\n" +
                                           "check stage (cs) - check is bot in second stage already + setting flag and appropriate command set\n" +
+                                          "send target profiles (stp) - send to all users their target profiles\n" +
                                           "exit - end program");
                         break;
                     case "srr":
                     case "send registratiom end reminder":
-                        var users = DBHandler.Users;
-                        foreach (var user in users)
+                        Console.WriteLine("You want to send everyone REMINDERS. Send YES if you are sure:");
+                        command = Console.ReadLine();
+
+                        if (command == "YES")
                         {
-                            if (user.State == States.NewUser || user.State == States.RegistrationStarted)
+                            Logger.Log("Sendings reminders to not registered users...");
+                            users = DBHandler.Users;
+                            foreach (var user in users)
                             {
-                                var difference = SecondStageDateTime - DateTime.Now;
-                                SendMessage(user.Id,
-                                    $"Напоминаем, что конец регистрации уже через {(int) difference.TotalMinutes} минут");
+                                if (user.State == States.NewUser || user.State == States.RegistrationStarted)
+                                {
+                                    var difference = SecondStageDateTime - DateTime.Now;
+                                    SendMessage(user.Id,
+                                        $"Напоминаем, что конец регистрации уже через {(int) difference.TotalMinutes} минут");
+                                    Logger.Log($"{user} Sent reminder");
+                                }
                             }
+
+                            Logger.Log("Done");
                         }
 
                         break;
                     case "cs":
                     case "check stage":
                         CheckBotStage();
+                        break;
+                    case "stp":
+                    case "send target profiles":
+                        Console.WriteLine("You want to send everyone their TARGET PROFILES. Send YES if you are sure:");
+                        command = Console.ReadLine();
+
+                        if (command == "YES")
+                        {
+                            Logger.Log("Sendings target profiles to users...");
+                            users = DBHandler.Users;
+                            foreach (var user in users)
+                            {
+                                if (user.State == States.TargetChosen)
+                                {
+                                    SendMessage(user.Id,
+                                        "Эй йоу, мы наконец-то определили цель для тебя! " +
+                                        "Вот, держи его(ее) анкету и быстрее шуруй думать подарок. " +
+                                        "Всем удачи в этом нелегком деле!");
+                                    SendTargetProfile(user.Id, user, DBHandler.GetUserById(user.TargetId));
+                                }
+                            }
+
+                            Logger.Log("Done");
+                        }
+
                         break;
                     case "exit":
                         Logger.Log("Ending execution by user command");
@@ -157,7 +194,7 @@ namespace ZhPPPSecretSantaTGBot
                     case "/send_target_profile":
                         if (localUser.State == States.TargetChosen || localUser.State == States.TargetSent)
                         {
-                            SendTargetProfile(chat, localUser, DBHandler.GetUserById(localUser.TargetId), user);
+                            SendTargetProfile(chat, localUser, DBHandler.GetUserById(localUser.TargetId));
                         }
                         else
                         {
@@ -603,8 +640,7 @@ namespace ZhPPPSecretSantaTGBot
             SendMessage(chat, textToSend);
         }
 
-        private static void SendTargetProfile(ChatId chat, User localUser, User targetUser,
-            Telegram.Bot.Types.User user)
+        private static void SendTargetProfile(ChatId chat, User localUser, User targetUser)
         {
             string textToSend = "";
 
@@ -620,7 +656,7 @@ namespace ZhPPPSecretSantaTGBot
             textToSend += targetUser.Ban + "\n";
 
             Logger.Log(
-                $"{user} Sending target (@{targetUser.Username ?? $"{targetUser.FirstName} {targetUser.LastName}"}) profile");
+                $"@{localUser.Username ?? $"{localUser.FirstName} {localUser.LastName}"} Sending target (@{targetUser.Username ?? $"{targetUser.FirstName} {targetUser.LastName}"}) profile");
             SendMessage(chat, textToSend);
             localUser.State = States.TargetSent;
             DBHandler.WriteCount();
