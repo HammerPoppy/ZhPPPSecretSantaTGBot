@@ -191,8 +191,6 @@ namespace ZhPPPSecretSantaTGBot
                         $"{user} sent a text message");
                     Logger.Log(e.Message.Text);
 
-                    // TODO detect non text
-
                     string textToSend;
                     switch (e.Message.Text)
                     {
