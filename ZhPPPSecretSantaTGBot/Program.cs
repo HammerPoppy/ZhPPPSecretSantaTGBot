@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Authentication.ExtendedProtection;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace ZhPPPSecretSantaTGBot
         private static readonly DateTime SecondStageDateTime = new DateTime(2020, 12, 21, 12, 21, 00);
         private static bool IsInSecondStage;
         private static readonly ChatId ownerChatId = 265814543;
+        private static List<Telegram.Bot.Types.User> MesWaitList;
 
         private static void Main()
         {
@@ -184,7 +186,7 @@ namespace ZhPPPSecretSantaTGBot
                     await BotClient.ForwardMessageAsync(ownerChatId, chat, e.Message.MessageId);
                     SendMessage(chat, "Принято ;)");
                     break;
-                
+
                 case MessageType.Text:
 
                     Logger.Log(
@@ -192,6 +194,39 @@ namespace ZhPPPSecretSantaTGBot
                     Logger.Log(e.Message.Text);
 
                     string textToSend;
+
+                    if (MesWaitList != null)
+                    {
+                        if (MesWaitList.Contains(user))
+                        {
+                            Logger.Log($"{user} listed in message wait list");
+                            if (e.Message.Text == "/cancel")
+                            {
+                                Logger.Log($"{user} sent /cancel so aborting operation");
+                                MesWaitList.Remove(user);
+                                textToSend = "Отправка сообщения Вашему Тайному Санте отменена";
+                                SendMessage(chat, textToSend);
+                            }
+                            else
+                            {
+                                var santaId = DBHandler.findSantaId(user);
+                                if (santaId == 0)
+                                {
+                                    Logger.Log("Error: santa ID didnt found");
+                                    return;
+                                }
+
+                                Logger.Log($"{user} Santa ID found - {santaId}, forwarding message to him");
+                                SendMessage(santaId, "Вам сообщение от Вашей цели:");
+                                await BotClient.ForwardMessageAsync(santaId, chat, e.Message.MessageId);
+
+                                textToSend = "Ваше сообщение успешно переслано!";
+                                SendMessage(chat, textToSend);
+                                MesWaitList.Remove(user);
+                            }
+                        }
+                    }
+
                     switch (e.Message.Text)
                     {
                         case "/start":
@@ -450,6 +485,45 @@ namespace ZhPPPSecretSantaTGBot
 
                             break;
 
+                        case "/send_message_to_santa":
+                            Logger.Log($"{user} askes to send message to santa");
+
+                            if (!IsInSecondStage)
+                            {
+                                Logger.Log($"{user} But bot isnt in second stage, sending refuse message");
+                                textToSend = "Извините, регистрация еще не закончилась";
+                                SendMessage(chat, textToSend);
+                            }
+                            else
+                            {
+                                if (localUser.State != States.TargetSent)
+                                {
+                                    Logger.Log($"{user} But he had not recieve target, sending refuse message");
+                                    textToSend = "Извините, вы не учавствуете в тайном санте. " +
+                                                 "Если Вам необходима помощь - обращайтесь в наш аккаунт поддержки @bIudger";
+                                    SendMessage(chat, textToSend);
+                                }
+                                else
+                                {
+                                    Logger.Log($"{user} Asking for message for santa");
+                                    textToSend = "Следующее Ваше сообщение (только первое) будет отправлено " +
+                                                 "Вашему Тайному Санте. Чтобы отменить это отправьте /cancel.";
+                                    SendMessage(chat, textToSend);
+
+                                    Logger.Log($"{user} Adding user to MesWaitList");
+                                    if (MesWaitList == null)
+                                    {
+                                        MesWaitList = new List<Telegram.Bot.Types.User> {user};
+                                    }
+                                    else
+                                    {
+                                        MesWaitList.Add(user);
+                                    }
+                                }
+                            }
+
+                            break;
+
                         // TODO non-in-registration response
 
                         default:
@@ -565,7 +639,8 @@ namespace ZhPPPSecretSantaTGBot
                     new BotCommand {Command = "start", Description = "получить начальные сообщения заново"},
                     new BotCommand {Command = "send_memo", Description = "посмотреть памятку с датами"},
                     new BotCommand {Command = "send_my_profile", Description = "посмотреть свою анкету"},
-                    new BotCommand {Command = "send_target_profile ", Description = "посмотреть анкету цели"}
+                    new BotCommand {Command = "send_target_profile", Description = "посмотреть анкету цели"},
+                    new BotCommand {Command = "send_message_to_santa", Description = "отправить сообщение своему Санте"}
                 });
             }
             else
