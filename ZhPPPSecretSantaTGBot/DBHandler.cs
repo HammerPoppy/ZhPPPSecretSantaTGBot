@@ -200,5 +200,19 @@ namespace ZhPPPSecretSantaTGBot
             AppClosing = true;
             Write();
         }
+
+        public int findSantaId(Telegram.Bot.Types.User user)
+        {
+            int targetId = user.Id;
+            foreach (var localUser in Users)
+            {
+                if (localUser.TargetId == targetId)
+                {
+                    return localUser.Id;
+                }
+            }
+
+            return 0;
+        }
     }
 }
